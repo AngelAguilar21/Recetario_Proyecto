@@ -14,26 +14,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
-
 @Composable
-fun Principal(navController: NavController) {
-
+fun Receta(navController: NavController) {
     Column (
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
 
-    ){
-        Text(text = "Principal", fontSize = 30.sp)
+        ){
+        Text(text = "Recetas", fontSize = 30.sp)
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
-                navController.navigate("Favoritos")
+                navController.navigate("perfil")
             }
         ) {
-            Text(text = "Navegar a Favoritos", fontSize = 20.sp)
+            Text(text = "Navegar a Perfil", fontSize = 20.sp)
         }
     }
 }

@@ -5,10 +5,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.recipescomp.Screems.Inicio_Login
-import com.example.recipescomp.Screems.Registrarse
-import com.example.recipescomp.Screems.Login_Principal
+import com.example.recipescomp.Auth.Registrarse
+import com.example.recipescomp.Auth.Login_Principal
 import com.example.recipescomp.Screems.Principal
 import com.example.recipescomp.Screems.Favoritos
+import com.example.recipescomp.Screems.Lista_Compras
+import com.example.recipescomp.Screems.Receta
+import com.example.recipescomp.Screems.Perfil
+import com.example.recipescomp.Screems.Configuracion
+import com.example.recipescomp.Screems.Lista_Compras_Detallado
+import com.example.recipescomp.Screems.Modo_Cocina
 
 
 @Composable
@@ -31,5 +37,24 @@ fun Navegation(){
         composable("Principal"){
             Principal(navController)
         }
+        composable("listaCompras"){
+            Lista_Compras(navController)
+        }
+        composable("listaComprasDetallada"){
+            Lista_Compras_Detallado(navController)
+        }
+        composable("receta"){
+            Receta(navController)
+        }
+        composable("perfil"){
+            Perfil(navController)
+        }
+        composable("configuracion"){
+            Configuracion(navController)
+        }
+        composable("modoCocina"){
+            Modo_Cocina(navController)
+        }
     }
 }
+
