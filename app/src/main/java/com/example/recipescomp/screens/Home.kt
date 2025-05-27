@@ -1,4 +1,5 @@
-package com.example.recetasapp
+package com.example.recipescomp.screens
+
 
 import BottomNavigationBar
 import androidx.compose.foundation.background
