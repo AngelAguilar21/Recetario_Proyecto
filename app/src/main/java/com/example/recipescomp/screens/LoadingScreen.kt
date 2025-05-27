@@ -1,4 +1,4 @@
-package com.example.recipescomp.Screems
+package com.example.recipescomp.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

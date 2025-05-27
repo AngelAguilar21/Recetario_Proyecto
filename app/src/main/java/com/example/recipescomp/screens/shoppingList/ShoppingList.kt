@@ -1,4 +1,4 @@
-package com.example.recipescomp.Screems
+package com.example.recipescomp.screens.shoppingList
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,23 +15,26 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun Receta(navController: NavController) {
+fun Lista_Compras(navController: NavController){
+
     Column (
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
 
         ){
-        Text(text = "Recetas", fontSize = 30.sp)
+        Text(text = "Lista de Compras", fontSize = 30.sp)
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
-                navController.navigate("perfil")
+                navController.navigate("listaComprasDetallada")
             }
         ) {
-            Text(text = "Navegar a Perfil", fontSize = 20.sp)
+            Text(text = "Navegar a Lista de Compras Detallado", fontSize = 20.sp)
         }
     }
 }
+
+

@@ -1,4 +1,4 @@
-package com.example.recipescomp.Screems
+package com.example.recipescomp.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,23 +15,23 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun Modo_Cocina(navController: NavController){
+fun Configuracion(navController: NavController) {
     Column (
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
 
         ){
-        Text(text = "Modo Cocina", fontSize = 30.sp)
+        Text(text = "Configuracion", fontSize = 30.sp)
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = {
-                navController.navigate("receta")
+                navController.navigate("Inicio_Login")
             }
         ) {
-            Text(text = "Navegar a Recetas", fontSize = 20.sp)
+            Text(text = "Salir", fontSize = 20.sp)
         }
     }
 }
