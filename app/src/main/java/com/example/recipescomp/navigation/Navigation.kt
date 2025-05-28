@@ -49,8 +49,20 @@ fun Navigation(){
             Modo_Cocina(navController)
         }
 
+        composable("search"){
+            SearchScreen(navController)
+        }
         composable("lista_ingredientes"){
             ListaIngredientes(navController)
+        }
+
+        composable("result"){
+            ResultScreen(navController)
+        }
+
+        composable("search")
+        {
+            SearchScreen(navController)
         }
     }
 }

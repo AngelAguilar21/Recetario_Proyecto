@@ -239,6 +239,35 @@ fun Receta(navController: NavController) {
                                     )
                                 }
                             }
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                ) {
+                                    androidx.compose.material3.Button(
+                                        onClick = {
+                                            navController.navigate("modoCocina")
+                                        },
+                                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                            containerColor = BrownDark
+                                        ),
+                                        shape = RoundedCornerShape(12.dp),
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .height(48.dp)
+                                    ) {
+                                        Text(
+                                            text = "Modo Cocina",
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
                         }
                     }
 

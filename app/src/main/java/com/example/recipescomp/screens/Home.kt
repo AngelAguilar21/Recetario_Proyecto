@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -125,24 +126,36 @@ fun Principal(navController: NavController) {
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextField(
-                        value = busqueda,
-                        onValueChange = { busqueda = it },
-                        placeholder = { Text("Buscar", color = Color.Gray) },
-                        leadingIcon = {
+                    Box(
+                        modifier = Modifier
+                            .weight(2f)
+                            .background(Color(0xFFF7F2E7), RoundedCornerShape(12.dp))
+                            .clickable {
+                                navController.navigate("search") // Navega a la pantalla de búsqueda
+                            }
+                            .padding(horizontal = 16.dp, vertical = 10.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                Icons.Default.Search,
+                                imageVector = Icons.Default.Search,
                                 contentDescription = "Ícono de búsqueda",
                                 tint = Color.Gray
                             )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(2f)
-                    )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Buscar",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.width(8.dp))
+
+                    // Ícono adicional
                     IconButton(
                         onClick = {
-                            // Acción al hacer clic
+                            // Acción adicional
                         },
                         modifier = Modifier
                             .size(56.dp)
@@ -150,13 +163,14 @@ fun Principal(navController: NavController) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.FormatListNumbered,
-                            contentDescription = "Ícono de búsqueda",
+                            contentDescription = "Ícono adicional",
                             tint = Color.Gray
                         )
                     }
                 }
             }
         }
+
 
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
