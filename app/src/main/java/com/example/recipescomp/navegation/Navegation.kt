@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.recetasapp.Principal
 import com.example.recipescomp.screens.Inicio_Login
 import com.example.recipescomp.auth.Registrarse
 import com.example.recipescomp.auth.Login_Principal
@@ -47,6 +46,9 @@ fun Navegation(){
         }
         composable("modoCocina"){
             Modo_Cocina(navController)
+        }
+        composable("recetasDestacadas") {
+            RecetasDestacadas(navController)
         }
     }
 }

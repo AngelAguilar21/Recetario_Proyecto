@@ -45,24 +45,19 @@ fun Receta(navController: NavController) {
     val tabs = listOf("INGREDIENTES", "PASO A PASO")
     var portions by remember { mutableStateOf(1) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 40.dp)
-    ){
-
-        // ENCABEZADO
+    Box(modifier = Modifier.fillMaxSize().padding(top = 10.dp)){
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
+                .fillMaxSize()
+                .padding(bottom = 100.dp)
+                .padding(horizontal = 10.dp, vertical = 16.dp)
         ) {
             BackButton(onClick = { navController.popBackStack() })
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(200.dp)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -104,114 +99,103 @@ fun Receta(navController: NavController) {
                     )
                 }
             }
-        }
+            // CONTENIDO SCROLLABLE
+            when (selectedTab) {
+                0 -> {
+                    val ingredientes = listOf(
+                        "Ingrediente 1" to "Cantidad y Medida",
+                        "Ingrediente 2" to "Cantidad y Medida",
+                        "Ingrediente 3" to "Cantidad y Medida",
+                        "Ingrediente 4" to "Cantidad y Medida",
+                        "Ingrediente 5" to "Cantidad y Medida",
+                        "Ingrediente 6" to "Cantidad y Medida",
+                        "Ingrediente 7" to "Cantidad y Medida",
+                        "Ingrediente 8" to "Cantidad y Medida",
+                        "Ingrediente 9" to "Cantidad y Medida"
+                    )
 
-        // CONTENIDO SCROLLABLE
-        when (selectedTab) {
-            0 -> {
-                val ingredientes = listOf(
-                    "Ingrediente 1" to "Cantidad y Medida",
-                    "Ingrediente 2" to "Cantidad y Medida",
-                    "Ingrediente 3" to "Cantidad y Medida",
-                    "Ingrediente 4" to "Cantidad y Medida",
-                    "Ingrediente 5" to "Cantidad y Medida",
-                    "Ingrediente 6" to "Cantidad y Medida",
-                    "Ingrediente 7" to "Cantidad y Medida",
-                    "Ingrediente 8" to "Cantidad y Medida",
-                    "Ingrediente 9" to "Cantidad y Medida"
-                )
-
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    item {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = "$portions PORCIONES",
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-
-                    items(ingredientes) { (name, measure) ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .background(Color(0xFFF7F2E7), RoundedCornerShape(8.dp))
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(name)
-                            Text(measure, color = Color(0xFFE1B38B))
-                        }
-                    }
-                }
-            }
-
-            1 -> {
-                val pasos = listOf("Paso 1", "Paso 2", "Paso 3", "Paso 4", "Paso 5", "Paso 6", "Paso 7", "Paso 8", "Paso 9", "Paso 10")
-
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    itemsIndexed(pasos) { index, step ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(vertical = 6.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .background(BrownDark, CircleShape),
-                                contentAlignment = Alignment.Center
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        item {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(vertical = 8.dp)
                             ) {
                                 Text(
-                                    "${index + 1}",
-                                    color = Color.White,
+                                    text = "$portions PORCIONES",
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(step)
+                        }
+
+                        items(ingredientes) { (name, measure) ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .background(Color(0xFFF7F2E7), RoundedCornerShape(8.dp))
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(name)
+                                Text(measure, color = Color(0xFFE1B38B))
+                            }
+                        }
+                    }
+                }
+
+                1 -> {
+                    val pasos = listOf("Paso 1", "Paso 2", "Paso 3", "Paso 4", "Paso 5", "Paso 6", "Paso 7", "Paso 8", "Paso 9", "Paso 10")
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        itemsIndexed(pasos) { index, step ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(vertical = 6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .background(BrownDark, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "${index + 1}",
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(step)
+                            }
                         }
                     }
                 }
             }
-        }
-
-        // BOTÓN Y NAVEGACIÓN
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-        ) {
             ReusableButton(
                 "Modo Cocina",
                 onClick = { navController.navigate("modoCocina") },
                 modifier = Modifier.padding(horizontal = 30.dp)
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
-            BottomNavigationBar(
-                navController = navController,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(BrownDark)
-                    .padding(vertical = 16.dp)
-            )
-
         }
+        BottomNavigationBar(
+            navController = navController,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .background(BrownDark)
+                .padding(vertical = 16.dp)
+        )
     }
 }

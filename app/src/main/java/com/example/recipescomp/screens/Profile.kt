@@ -37,110 +37,108 @@ import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
 fun Perfil(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(horizontal = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BackButton(onClick = { navController.popBackStack() })
-            Text(
-                text = "Perfil",
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Avatar con ícono + y nombre usuario
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Avatar",
-                    modifier = Modifier.size(72.dp),
-                    tint = Color.DarkGray
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = "User name",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Título "Recetas Favoritas" con estrella
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Recetas Favoritas",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = "Favoritas",
-                tint = Color.Yellow
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            items(5) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 100.dp, height = 140.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.LightGray)
-                        .clickable {
-                            navController.navigate("Receta")
-                        }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Box(
+    Box(
+        Modifier.fillMaxSize()
+        .padding(top = 10.dp)
+    ){
+        Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.White)
+                .padding(horizontal = 16.dp)
         ) {
-            BottomNavigationBar(
-                navController = navController,
+            Row(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(BrownDark)
-                    .padding(vertical = 16.dp)
-            )
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BackButton(onClick = { navController.popBackStack() })
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "Perfil",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Avatar",
+                        modifier = Modifier.size(72.dp),
+                        tint = Color.DarkGray
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Text(
+                    text = "User name",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Título "Recetas Favoritas" con estrella
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recetas Favoritas",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Favoritas",
+                    tint = Color.Yellow
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                items(5) {
+                    Box(
+                        modifier = Modifier
+                            .size(width = 100.dp, height = 140.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.LightGray)
+                            .clickable {
+                                navController.navigate("Receta")
+                            }
+                    )
+                }
+            }
         }
+
+        BottomNavigationBar(
+            navController = navController,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .background(BrownDark)
+                .padding(vertical = 16.dp)
+        )
     }
+
 }

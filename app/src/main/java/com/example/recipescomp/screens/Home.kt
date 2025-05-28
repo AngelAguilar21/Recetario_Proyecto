@@ -19,10 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.FormatListNumbered
@@ -62,196 +60,260 @@ import com.example.recipescomp.ui.theme.GrayPlaceholder
 @Composable
 fun Principal(navController: NavController) {
 
-    val scrollState = rememberScrollState()
     var busqueda by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(top = 40.dp)
-    ) {
-        Box(
+    Box(
+        modifier = Modifier.fillMaxSize().padding(top = 10.dp)
+    )
+    {
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(
-                    BrownDark,
-                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-                )
+                .fillMaxSize()
+                .padding(bottom = 100.dp, top = 16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(
+                            BrownDark,
+                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+                        )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Bienvenido",
+                                    color = Color.White,
+                                    fontSize = 28.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "los ingredientes te esperan...",
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Usuario",
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(40.dp)
+                                        .clickable(
+                                            onClick = {
+                                                navController.navigate("Perfil")
+                                            }
+                                        )
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextField(
+                                value = busqueda,
+                                onValueChange = { busqueda = it },
+                                placeholder = { Text("Buscar", color = Color.Gray) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = "Ícono de búsqueda",
+                                        tint = Color.Gray
+                                    )
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(2f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(
+                                onClick = {
+                                    // Acción al hacer clic
+                                },
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .background(Color.White, RoundedCornerShape(12.dp))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FormatListNumbered,
+                                    contentDescription = "Ícono de búsqueda",
+                                    tint = Color.Gray
+                                )
+                            }
+
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+
+            item {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "Bienvenido",
-                            color = Color.White,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "los ingredientes te esperan...",
-                            color = Color.White,
-                            fontSize = 16.sp
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(Color.White),
-                        contentAlignment = Alignment.Center
-                    ){
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Usuario",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextField(
-                        value = busqueda,
-                        onValueChange = { busqueda = it },
-                        placeholder = { Text("Buscar", color = Color.Gray) },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = "Ícono de búsqueda",
-                                tint = Color.Gray
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(2f)
+                    Text(
+                        text = "Recetas Destacadas",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = BrownDark
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(
-                        onClick = {
-                            // Acción al hacer clic
-                        },
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(Color.White, RoundedCornerShape(12.dp))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.FormatListNumbered,
-                            contentDescription = "Ícono de búsqueda",
-                            tint = Color.Gray
-                        )
-                    }
-                }
-            }
-        }
-
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Recetas Destacadas",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = BrownDark
-                )
-                Text(
-                    text = "Ver todo >>",
-                    fontSize = 14.sp,
-                    color = BrownLight,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp)
-            ) {
-                items(5) {
-                    Box(
-                        modifier = Modifier
-                            .size(width = 100.dp, height = 140.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.LightGray)
-                            .clickable {
-                            navController.navigate("Receta")
-                            }
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Categorías",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = BrownDark
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            val categories = listOf(
-                Category(
-                    "1", "Desayunos",
-                    iconComposable = { Icon(imageVector = Icons.Default.FreeBreakfast, contentDescription = "Desayuno",modifier = Modifier.size(50.dp)) }
-                ),
-                Category(
-                    "2", "Postres",
-                    iconComposable = { Icon(imageVector = Icons.Default.Cake, contentDescription = "Postres",modifier = Modifier.size(50.dp)) }
-                ),
-                Category(
-                    "3", "Almuerzos",
-                    iconComposable = { Icon(imageVector = Icons.Default.RestaurantMenu, contentDescription = "Almuerzo", modifier = Modifier.size(50.dp)) }
-                ),
-                Category(
-                    "4", "Bebidas",
-                    iconComposable = { Icon(imageVector = Icons.Default.LocalDrink, contentDescription = "Bebidas",modifier = Modifier.size(50.dp)) }
-                ),
-                Category(
-                    "5", "Saludables",
-                    iconComposable = { Icon(imageVector = Icons.Default.Spa, contentDescription = "Saludable",modifier = Modifier.size(50.dp)) }
-                )
-            )
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                categories.forEach { category ->
-                    CategoryItem(
-                        icon = category.iconComposable,
-                        categoryName = category.name,
-                        onClick = {
-                            navController.navigate("Favoritos")
+                    Text(
+                        text = "Ver todo >>",
+                        fontSize = 14.sp,
+                        color = BrownLight,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable {
+                            navController.navigate("recetasDestacadas")
                         }
                     )
                 }
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Lista horizontal recetas destacadas
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(5) {
+                        Box(
+                            modifier = Modifier
+                                .size(width = 200.dp, height = 140.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.LightGray)
+                                .clickable {
+                                    navController.navigate("Receta")
+                                }
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
-            Text(
-                text = "Recomendaciones",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = BrownDark
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            // Título "Categorías"
+            item {
+                Text(
+                    text = "Categorías",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = BrownDark,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
+            // Row con categorías (no se puede usar Row dentro de LazyColumn directamente, por eso usamos item)
+            item {
+                val categories = listOf(
+                    Category(
+                        "1", "Desayunos",
+                        iconComposable = {
+                            Icon(
+                                imageVector = Icons.Default.FreeBreakfast,
+                                contentDescription = "Desayuno",
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }
+                    ),
+                    Category(
+                        "2", "Postres",
+                        iconComposable = {
+                            Icon(
+                                imageVector = Icons.Default.Cake,
+                                contentDescription = "Postres",
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }
+                    ),
+                    Category(
+                        "3", "Almuerzos",
+                        iconComposable = {
+                            Icon(
+                                imageVector = Icons.Default.RestaurantMenu,
+                                contentDescription = "Almuerzo",
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }
+                    ),
+                    Category(
+                        "4", "Bebidas",
+                        iconComposable = {
+                            Icon(
+                                imageVector = Icons.Default.LocalDrink,
+                                contentDescription = "Bebidas",
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }
+                    ),
+                    Category(
+                        "5", "Saludables",
+                        iconComposable = {
+                            Icon(
+                                imageVector = Icons.Default.Spa,
+                                contentDescription = "Saludable",
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }
+                    )
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
+                ) {
+                    categories.forEach { category ->
+                        CategoryItem(
+                            icon = category.iconComposable,
+                            categoryName = category.name,
+                            onClick = {
+                                navController.navigate("Favoritos")
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // Título "Recomendaciones"
+            item {
+                Text(
+                    text = "Recomendaciones",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = BrownDark,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // Lista vertical de recetas populares
             val popularRecipes = listOf(
                 Recipe("p1", "Receta Popular 1"),
                 Recipe("p2", "Receta Popular 2"),
@@ -259,49 +321,38 @@ fun Principal(navController: NavController) {
                 Recipe("p4", "Receta Popular 4"),
                 Recipe("p5", "Receta Popular 5")
             )
-
-            LazyColumn(
-                modifier = Modifier
-                    .height(200.dp)
-                    .fillMaxWidth()
-                    .padding(horizontal = 0.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(popularRecipes) { recipe ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(80.dp)
-                            .background(GrayPlaceholder, RoundedCornerShape(8.dp))
-                            .clickable {
-                                navController.navigate("Receta")
-                            }
-                    ) {
-                        Text(
-                            text = recipe.title,
-                            modifier = Modifier.align(Alignment.Center),
-                            color = BrownDark,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+            items(popularRecipes) { recipe ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(GrayPlaceholder)
+                        .clickable {
+                            navController.navigate("Receta")
+                        }
+                ) {
+                    Text(
+                        text = recipe.title,
+                        modifier = Modifier.align(Alignment.Center),
+                        color = BrownDark,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
-
-        Box(
+        Spacer(modifier = Modifier.height(24.dp))
+        // Barra inferior fija
+        BottomNavigationBar(
+            navController = navController,
             modifier = Modifier
-                .fillMaxSize()
-        ) {
-            BottomNavigationBar(
-                navController = navController,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(BrownDark)
-                    .padding(vertical = 16.dp)
-            )
-        }
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .background(BrownDark)
+                .padding(vertical = 16.dp)
+        )
     }
 }
 
