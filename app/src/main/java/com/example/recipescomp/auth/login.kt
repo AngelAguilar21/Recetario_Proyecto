@@ -1,9 +1,9 @@
 package com.example.recipescomp.auth
 
-import ReusableButton
-import ReusableButtonLogin
-import ReusableLoginTextField
-import ReusableText
+import com.example.recipescomp.components.ReusableButton
+import com.example.recipescomp.components.ReusableButtonLogin
+import com.example.recipescomp.components.ReusableLoginTextField
+import com.example.recipescomp.components.ReusableText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

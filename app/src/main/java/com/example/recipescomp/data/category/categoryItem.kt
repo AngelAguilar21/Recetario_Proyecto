@@ -20,11 +20,9 @@ import com.example.recipescomp.ui.theme.BrownDark
 fun CategoryItem(
     icon: @Composable () -> Unit,
     categoryName: String,
-    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
-            .clickable { onClick() }
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

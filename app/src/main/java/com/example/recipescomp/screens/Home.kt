@@ -1,7 +1,7 @@
 package com.example.recipescomp.screens
 
 
-import BottomNavigationBar
+import com.example.recipescomp.components.BottomNavigationBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -48,12 +51,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.recipescomp.components.RecipeCardFav
 import com.example.recipescomp.data.category.Category
 import com.example.recipescomp.data.category.CategoryItem
-import com.example.recipescomp.data.category.Recipe
 import com.example.recipescomp.ui.theme.BrownDark
 import com.example.recipescomp.ui.theme.BrownLight
-import com.example.recipescomp.ui.theme.GrayPlaceholder
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +65,7 @@ fun Principal(navController: NavController) {
     var busqueda by remember { mutableStateOf("") }
 
     Box(
-        modifier = Modifier.fillMaxSize().padding(top = 10.dp)
+        modifier = Modifier.fillMaxSize().padding(top = 10.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     )
     {
         LazyColumn(
@@ -237,7 +239,10 @@ fun Principal(navController: NavController) {
                             Icon(
                                 imageVector = Icons.Default.FreeBreakfast,
                                 contentDescription = "Desayuno",
-                                modifier = Modifier.size(50.dp)
+                                modifier = Modifier.size(50.dp).
+                                clickable {
+                                    navController.navigate("desayuno")
+                                }
                             )
                         }
                     ),
@@ -247,7 +252,10 @@ fun Principal(navController: NavController) {
                             Icon(
                                 imageVector = Icons.Default.Cake,
                                 contentDescription = "Postres",
-                                modifier = Modifier.size(50.dp)
+                                modifier = Modifier.size(50.dp).
+                                clickable {
+                                    navController.navigate("postre")
+                                }
                             )
                         }
                     ),
@@ -257,7 +265,10 @@ fun Principal(navController: NavController) {
                             Icon(
                                 imageVector = Icons.Default.RestaurantMenu,
                                 contentDescription = "Almuerzo",
-                                modifier = Modifier.size(50.dp)
+                                modifier = Modifier.size(50.dp).
+                                clickable {
+                                    navController.navigate("almuerzo")
+                                }
                             )
                         }
                     ),
@@ -267,7 +278,10 @@ fun Principal(navController: NavController) {
                             Icon(
                                 imageVector = Icons.Default.LocalDrink,
                                 contentDescription = "Bebidas",
-                                modifier = Modifier.size(50.dp)
+                                modifier = Modifier.size(50.dp).
+                                clickable {
+                                    navController.navigate("bebida")
+                                }
                             )
                         }
                     ),
@@ -277,27 +291,27 @@ fun Principal(navController: NavController) {
                             Icon(
                                 imageVector = Icons.Default.Spa,
                                 contentDescription = "Saludable",
-                                modifier = Modifier.size(50.dp)
+                                modifier = Modifier.size(50.dp).
+                                clickable {
+                                    navController.navigate("saludable")
+                                }
                             )
                         }
                     )
                 )
 
-                Row(
+                LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    categories.forEach { category ->
-                        CategoryItem(
+                    items(categories) { category ->
+                           CategoryItem(
                             icon = category.iconComposable,
-                            categoryName = category.name,
-                            onClick = {
-                                navController.navigate("Favoritos")
-                            }
+                            categoryName = category.name
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
@@ -312,34 +326,16 @@ fun Principal(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
-
-            // Lista vertical de recetas populares
-            val popularRecipes = listOf(
-                Recipe("p1", "Receta Popular 1"),
-                Recipe("p2", "Receta Popular 2"),
-                Recipe("p3", "Receta Popular 3"),
-                Recipe("p4", "Receta Popular 4"),
-                Recipe("p5", "Receta Popular 5")
-            )
-            items(popularRecipes) { recipe ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(GrayPlaceholder)
-                        .clickable {
-                            navController.navigate("Receta")
-                        }
-                ) {
-                    Text(
-                        text = recipe.title,
-                        modifier = Modifier.align(Alignment.Center),
-                        color = BrownDark,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+            val recipes = List(10) { index -> "Receta ${index + 1}" }
+            items(recipes) { title ->
+                RecipeCardFav(
+                    title = title,
+                    false,
+                    navController = navController,
+                    onFavoriteClick = { isFav ->
+                        // Manejo de favorito si quieres
+                    }
+                )
             }
         }
         Spacer(modifier = Modifier.height(24.dp))

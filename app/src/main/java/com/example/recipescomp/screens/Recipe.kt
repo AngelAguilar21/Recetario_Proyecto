@@ -1,8 +1,8 @@
 package com.example.recipescomp.screens
 
-import BackButton
-import BottomNavigationBar
-import ReusableButton
+import com.example.recipescomp.components.BackButton
+import com.example.recipescomp.components.BottomNavigationBar
+import com.example.recipescomp.components.ReusableButton
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,7 +48,7 @@ fun Receta(navController: NavController) {
     val tabs = listOf("INGREDIENTES", "PASO A PASO")
     var portions by remember { mutableStateOf(1) }
 
-    Box(modifier = Modifier.fillMaxSize().padding(top = 10.dp)){
+    Box(modifier = Modifier.fillMaxSize().padding(top = 10.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())){
         Column(
             modifier = Modifier
                 .fillMaxSize()

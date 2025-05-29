@@ -1,18 +1,18 @@
 package com.example.recipescomp.auth
 
-import ReusableButton
-import ReusableButtonLogin
-import ReusableDropdown
-import ReusableLoginTextField
-import ReusableText
+import com.example.recipescomp.components.ReusableButton
+import com.example.recipescomp.components.ReusableButtonLogin
+import com.example.recipescomp.components.ReusableDropdown
+import com.example.recipescomp.components.ReusableLoginTextField
+import com.example.recipescomp.components.ReusableText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -66,7 +67,9 @@ fun Registrarse(navController: NavController ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .padding(
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            )
     ) {
         Image(
             painter = painterResource(id = R.drawable.fondo_login_2),
@@ -79,52 +82,57 @@ fun Registrarse(navController: NavController ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(750.dp)
+                .fillMaxHeight(0.85f)
                 .padding(horizontal = 40.dp)
                 .align(Alignment.TopCenter)
                 .offset(y = 80.dp),
             shape = RoundedCornerShape(24.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
-        )  {
-            Column(
+        ) {
+            LazyColumn(
                 modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    ReusableButtonLogin(
-                        text = "INGRESAR",
-                        isSelected = false,
-                        onClick = { navController.navigate("Login_Principal") },
-                        modifier = Modifier.weight(1f),
-                        selectedColor = Color.LightGray,
-                        unselectedColor = Color.LightGray,
-                        selectedTextColor = Color.Black,
-                        unselectedTextColor = Color.Black,
-                        fontSize = 13.sp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                // El Row con los botones
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        ReusableButtonLogin(
+                            text = "INGRESAR",
+                            isSelected = false,
+                            onClick = { navController.navigate("Login_Principal") },
+                            modifier = Modifier.weight(1f),
+                            selectedColor = Color.LightGray,
+                            unselectedColor = Color.LightGray,
+                            selectedTextColor = Color.Black,
+                            unselectedTextColor = Color.Black,
+                            fontSize = 13.sp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                    ReusableButtonLogin(
-                        text = "REGISTRARSE",
-                        isSelected = isRegistry,
-                        onClick = { isRegistry = true },
-                        modifier = Modifier.weight(1f),
-                        fontSize = 10.sp
-                    )
+                        ReusableButtonLogin(
+                            text = "REGISTRARSE",
+                            isSelected = isRegistry,
+                            onClick = { isRegistry = true },
+                            modifier = Modifier.weight(1f),
+                            fontSize = 10.sp
+                        )
+                    }
                 }
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+
+                // El resto de los elementos como items separados con espacios automáticos
+                item {
                     ReusableText(
                         "BIENVENIDO CHEF", 25.sp, MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(bottom = 15.dp), color = Color.Black
                     )
+                }
 
+                item {
                     ReusableText(
                         "Ingrese su informacion",
                         14.sp,
@@ -132,23 +140,31 @@ fun Registrarse(navController: NavController ) {
                         modifier = Modifier.padding(bottom = 15.dp),
                         color = Color.Gray
                     )
+                }
 
+                item {
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
                         label = { Text("Nombre de Usuario") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                }
 
+                item { Spacer(modifier = Modifier.height(12.dp)) }
+
+                item {
                     ReusableLoginTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = "Nombre de Usuario",
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                }
 
+                item { Spacer(modifier = Modifier.height(12.dp)) }
+
+                item {
                     ReusableLoginTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -156,42 +172,55 @@ fun Registrarse(navController: NavController ) {
                         modifier = Modifier.fillMaxWidth(),
                         isPassword = true
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                item { Spacer(modifier = Modifier.height(12.dp)) }
 
+                item {
                     ReusableDropdown(
-                        label = "Selecciona una opción",
+                        label = "Tipo de Dieta",
                         options = dietOptions,
                         selected = selectedDiet,
                         onSelect = { selectedDiet = it },
                         expanded = dietExpanded,
                         onExpandedChange = { dietExpanded = it }
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                item { Spacer(modifier = Modifier.height(12.dp)) }
+
+                item {
                     ReusableDropdown(
-                        label = "Selecciona una opción",
+                        label = "Nivel de cocina",
                         options = cookingLevelOptions,
                         selected = selectedCookingLevel,
-                        expanded= cookingLevelExpanded,
+                        expanded = cookingLevelExpanded,
                         onSelect = { selectedCookingLevel = it },
                         onExpandedChange = { cookingLevelExpanded = it }
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                item { Spacer(modifier = Modifier.height(12.dp)) }
+
+                item {
                     ReusableDropdown(
-                        label = "Selecciona una opción",
+                        label = "Cocina Favorita",
                         options = favoriteCuisineOptions,
                         selected = selectedFavoriteCuisine,
                         expanded = favoriteCuisineExpanded,
                         onSelect = { selectedFavoriteCuisine = it },
                         onExpandedChange = { favoriteCuisineExpanded = it }
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                item { Spacer(modifier = Modifier.height(10.dp)) }
 
-                    ReusableButton("REGISTRARSE", onClick = {navController.navigate("Login_Principal")})
+                item {
+                    ReusableButton(
+                        "REGISTRARSE",
+                        onClick = { navController.navigate("Login_Principal") })
                 }
             }
-
         }
     }
 }

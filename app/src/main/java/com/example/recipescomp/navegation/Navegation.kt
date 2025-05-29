@@ -4,10 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.recipescomp.screens.Inicio_Login
-import com.example.recipescomp.auth.Registrarse
-import com.example.recipescomp.auth.Login_Principal
+import com.example.recipescomp.auth.*
 import com.example.recipescomp.screens.*
+import com.example.recipescomp.screens.category.*
 import com.example.recipescomp.screens.shoppingList.*
 
 
@@ -27,7 +26,7 @@ fun Navegation(){
             Login_Principal(navController)
         }
         composable("Favoritos"){
-            Favoritos(navController)
+            ListFavRec(navController)
         }
         composable("Principal"){
             Principal(navController)
@@ -50,6 +49,21 @@ fun Navegation(){
         composable("recetasDestacadas") {
             RecetasDestacadas(navController)
         }
-    }
+        composable("desayuno"){
+            Breakfast(navController)
+        }
+        composable("almuerzo"){
+            Lunch(navController)
+        }
+        composable("saludable"){
+            Healthy(navController)
+        }
+        composable("postre"){
+            Dessert(navController)
+        }
+        composable("bebida"){
+            Drink(navController)
+        }
+   }
 }
 
