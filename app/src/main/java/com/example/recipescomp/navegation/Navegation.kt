@@ -4,17 +4,18 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.recipescomp.auth.*
+import com.example.recipescomp.screens.Principal
+import com.example.recipescomp.screens.Inicio_Login
+import com.example.recipescomp.auth.Registrarse
+import com.example.recipescomp.auth.Login_Principal
 import com.example.recipescomp.screens.*
-import com.example.recipescomp.screens.category.*
 import com.example.recipescomp.screens.shoppingList.*
 
 
 
 @Composable
-fun Navegation(){
-
-    var navController = rememberNavController()
+fun Navigation(){
+    val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "Inicio_Login"){
         composable("Inicio_Login"){
             Inicio_Login(navController)
@@ -46,24 +47,21 @@ fun Navegation(){
         composable("modoCocina"){
             Modo_Cocina(navController)
         }
-        composable("recetasDestacadas") {
-            RecetasDestacadas(navController)
-        }
-        composable("desayuno"){
-            Breakfast(navController)
-        }
-        composable("almuerzo"){
-            Lunch(navController)
-        }
-        composable("saludable"){
-            Healthy(navController)
-        }
-        composable("postre"){
-            Dessert(navController)
-        }
-        composable("bebida"){
-            Drink(navController)
-        }
-   }
-}
 
+        composable("search"){
+            SearchScreen(navController)
+        }
+        composable("lista_ingredientes"){
+            ListaIngredientes(navController)
+        }
+
+        composable("result"){
+            ResultScreen(navController)
+        }
+
+        composable("search")
+        {
+            SearchScreen(navController)
+        }
+    }
+}
