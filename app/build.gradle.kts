@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
+
+
 }
 
 android {
@@ -40,7 +43,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -61,4 +63,17 @@ dependencies {
     //Add navigation compose
     implementation("androidx.navigation:navigation-compose:2.4.0")
     implementation("androidx.compose.material:material-icons-extended")
+
+
+    //Add room
+    implementation("androidx.room:room-runtime:2.4.3")
+    //Add room ktx
+    implementation("androidx.room:room-ktx:2.4.3")
+    //Add room compiler
+    ksp("androidx.room:room-compiler:2.4.3")
+    //Add room paging
+    implementation("androidx.room:room-paging:2.4.3")
 }
+
+
+

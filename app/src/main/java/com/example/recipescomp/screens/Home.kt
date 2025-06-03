@@ -39,6 +39,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,13 +48,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.recipescomp.components.RecipeCardFav
 import com.example.recipescomp.data.category.Category
 import com.example.recipescomp.data.category.CategoryItem
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.local.FavoriteRecipesEntity
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
 import com.example.recipescomp.ui.theme.BrownLight
 
@@ -61,6 +69,13 @@ import com.example.recipescomp.ui.theme.BrownLight
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Principal(navController: NavController) {
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getInstance(context) }
+    val repository = remember { FavoriteRecipeRepository(db.FavoriteRecipesDao()) }
+    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+
+    val favorites by viewModel.favorites.collectAsState()
+    val recipes = List(10) { index -> "Receta ${index + 1}" }
 
     var busqueda by remember { mutableStateOf("") }
 
@@ -306,7 +321,7 @@ fun Principal(navController: NavController) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(categories) { category ->
-                           CategoryItem(
+                        CategoryItem(
                             icon = category.iconComposable,
                             categoryName = category.name
                         )
@@ -328,12 +343,18 @@ fun Principal(navController: NavController) {
             }
             val recipes = List(10) { index -> "Receta ${index + 1}" }
             items(recipes) { title ->
+                val isFavorite = favorites.any { it.name == title }
+
                 RecipeCardFav(
                     title = title,
-                    false,
+                    isFavoriteInitial = isFavorite,
                     navController = navController,
-                    onFavoriteClick = { isFav ->
-                        // Manejo de favorito si quieres
+                    onFavoriteClick =  { isFav ->
+                        if (isFav) {
+                            viewModel.insertFavorite(FavoriteRecipesEntity(name = title, imageUrl = null))
+                        } else {
+                            viewModel.deleteFavorite(title)
+                        }
                     }
                 )
             }
@@ -351,4 +372,3 @@ fun Principal(navController: NavController) {
         )
     }
 }
-

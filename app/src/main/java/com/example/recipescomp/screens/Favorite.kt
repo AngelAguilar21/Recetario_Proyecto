@@ -17,20 +17,37 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
+import com.example.recipescomp.data.repository.RecipeModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
 fun ListFavRec(navController: NavController) {
     //Creacion de recetas
-    val recipes = List(10) { index ->
-        "Receta ${index + 1}"
+    val context = LocalContext.current
+    val db = remember { AppDatabase.getInstance(context) }
+    val repository = remember { FavoriteRecipeRepository(db.FavoriteRecipesDao()) }
+    val viewModel : FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+
+    val favorites by viewModel.favorites.collectAsState()
+
+    val mappedRecipes = favorites.map {
+        RecipeModel(name = it.name, it.imageUrl)
     }
     Box(modifier = Modifier.fillMaxSize().padding(top = 10.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())) {
         Column(
@@ -50,18 +67,23 @@ fun ListFavRec(navController: NavController) {
                     .align(Alignment.CenterHorizontally)
             )
 
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(recipes) { title->
+            LazyColumn {
+                items(mappedRecipes) { recipe ->
                     RecipeCardFav(
-                        title = title,
-                        true,
-                        navController = navController,
+                        title = recipe.name,
+                        imageUrl = recipe.imageUrl,
+                        isFavoriteInitial = true, // ya es favorito
                         onFavoriteClick = { isFav ->
-                            // Manejo de favorito si quieres
-                        }
+                            if (!isFav) {
+                                viewModel.deleteFavorite(recipe.name)
+                            }
+                        },
+                        navController = navController
                     )
                 }
             }
+
+
         }
 
         BottomNavigationBar(
