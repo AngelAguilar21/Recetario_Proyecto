@@ -5,9 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -32,9 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.ResourcesApi.Meal
-import com.example.recipescomp.ui.theme.BrownDark
-import kotlin.collections.remove
-
 @Composable
 fun OtherRecipeSection(meal: Meal, navController: NavController) {
     val favorites = remember { mutableStateListOf<String>() }

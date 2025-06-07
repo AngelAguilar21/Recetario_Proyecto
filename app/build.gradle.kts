@@ -70,4 +70,8 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
 
+    //
+    implementation("androidx.compose.material3:material3:1.1.2")
+    implementation("io.coil-kt:coil-compose:2.2.2")
+
 }

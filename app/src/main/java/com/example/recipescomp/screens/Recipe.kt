@@ -1,28 +1,31 @@
 package com.example.recipescomp.screens
 
-import android.content.Intent
-import android.net.Uri
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.ResourcesApi.Meal
-import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.components.ReusableButton
 import com.example.recipescomp.ui.theme.BrownDark
@@ -31,9 +34,11 @@ import com.example.recipescomp.ui.theme.BrownDark
 fun Receta(navController: NavController, meal: Meal) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("INGREDIENTES", "PASO A PASO")
-    val context = LocalContext.current
 
-    // Armar lista de ingredientes válidos
+    //variable favorite
+    val isFavorite = remember { mutableStateOf(false) }
+
+    // ✅ Armar lista de ingredientes válidos
     val ingredientes = remember(meal) {
         (1..20).mapNotNull { i ->
             val ingredient = meal.javaClass.getDeclaredField("strIngredient$i").apply { isAccessible = true }.get(meal) as? String
@@ -45,46 +50,101 @@ fun Receta(navController: NavController, meal: Meal) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 10.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .padding(
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     ) {
-        Column(
+        // 🔳 CABECERA CON IMAGEN Y BOTÓN
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 100.dp)
-                .padding(horizontal = 10.dp, vertical = 16.dp)
+                .fillMaxWidth()
+                .height(250.dp)
         ) {
-            BackButton(onClick = { navController.popBackStack() })
-
+            // 🖼 IMAGEN DE RECETA
             Image(
-                painter = rememberImagePainter(meal.strMealThumb),
+                painter = rememberAsyncImagePainter(meal.strMealThumb),
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .clip(RoundedCornerShape(12.dp)),
+                    .fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = meal.strMeal,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            meal.strCategory?.let {
-                Text("Categoría: $it", style = MaterialTheme.typography.bodySmall)
+            // 🔙 BOTÓN DE REGRESO SUPERPUESTO
+            Box(
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 30.dp)
+                    .size(40.dp)
+                    .background(Color.White.copy(alpha = 0.7f), shape = CircleShape)
+                    .clickable { navController.popBackStack() }
+                    .align(Alignment.TopStart), // lo ubica arriba a la izquierda
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Atrás",
+                    tint = BrownDark
+                )
             }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 80.dp)
+                .padding(horizontal = 10.dp, vertical = 16.dp)
+        ) {
 
-            meal.strArea?.let {
-                Text("Región: $it", style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.height(250.dp))
+
+            // 📝 SECCIÓN DE DESCRIPCIÓN DE LA RECETA (Nombre, categoría, región) + FAVORITO + CANTIDAD DE INGREDIENTES
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
+                    Text(
+                        text = meal.strMeal,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    meal.strCategory?.let {
+                        Text("Categoría: $it", style = MaterialTheme.typography.bodySmall)
+                    }
+
+                    meal.strArea?.let {
+                        Text("Región: $it", style = MaterialTheme.typography.bodySmall)
+                    }
+
+                    // 🧮 CANTIDAD DE INGREDIENTES
+                    Text(
+                        text = "Ingredientes: ${ingredientes.size}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                // ❤️ BOTÓN DE FAVORITO a la derecha
+                IconButton(
+                    onClick = {
+                        isFavorite.value = !isFavorite.value
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorito",
+                        tint = if (isFavorite.value) Color.Red else Color.Gray
+                    )
+                }
             }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
 
+            // 📑 SECCIÓN DE TABS (INGREDIENTES / PASO A PASO)
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = Color.Transparent,
@@ -105,6 +165,7 @@ fun Receta(navController: NavController, meal: Meal) {
                 }
             }
 
+            // 📋 CONTENIDO DE INGREDIENTES O PASOS (SEGÚN TAB SELECCIONADA)
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -113,6 +174,7 @@ fun Receta(navController: NavController, meal: Meal) {
             ) {
                 when (selectedTab) {
                     0 -> {
+                        // 🧂 INGREDIENTES
                         items(ingredientes) { (name, measure) ->
                             Row(
                                 modifier = Modifier
@@ -129,6 +191,7 @@ fun Receta(navController: NavController, meal: Meal) {
                     }
 
                     1 -> {
+                        // 👣 PASO A PASO
                         val pasos = meal.strInstructions?.split(Regex("\r?\n"))?.filter { it.isNotBlank() } ?: listOf("No hay instrucciones disponibles.")
 
                         items(pasos) { paso ->
@@ -156,23 +219,7 @@ fun Receta(navController: NavController, meal: Meal) {
                 }
             }
 
-            if (!meal.strYoutube.isNullOrBlank()) {
-                Button(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(meal.strYoutube))
-                        context.startActivity(intent)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrownDark),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp)
-                ) {
-                    Text("Ver Video", color = Color.White)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // 🍳 BOTÓN MODO COCINA
             ReusableButton(
                 "Modo Cocina",
                 onClick = { navController.navigate("modoCocina") },
@@ -180,14 +227,19 @@ fun Receta(navController: NavController, meal: Meal) {
             )
         }
 
+        // 🔽 BARRA DE NAVEGACIÓN INFERIOR
         BottomNavigationBar(
             navController = navController,
             modifier = Modifier
-                .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .padding(bottom = 12.dp)
+                .padding(horizontal = 32.dp)
+                .clip(RoundedCornerShape(50))
                 .background(BrownDark)
-                .padding(vertical = 16.dp)
+                .shadow(10.dp, RoundedCornerShape(50))
+                .fillMaxWidth()
+                .height(64.dp)
         )
     }
 }
+
