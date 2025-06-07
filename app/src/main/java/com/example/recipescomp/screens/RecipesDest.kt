@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -89,10 +90,13 @@ fun RecetasDestacadas(navController: NavController){
             navController = navController,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .padding(bottom = 12.dp) // 🔼 lo eleva del borde inferior
+                .padding(horizontal = 32.dp) // 🔼 lo separa de los bordes laterales
+                .clip(RoundedCornerShape(50)) // 🟢 redondeado total
                 .background(BrownDark)
-                .padding(vertical = 16.dp)
+                .shadow(10.dp, RoundedCornerShape(50)) // ✨ sombra flotante
+                .fillMaxWidth()
+                .height(64.dp) // 📏 altura fija opcional,
         )
     }
 }

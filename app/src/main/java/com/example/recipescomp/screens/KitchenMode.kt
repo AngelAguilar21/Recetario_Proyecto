@@ -27,15 +27,20 @@ fun Modo_Cocina(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F2E7)), // Fondo claro
-        verticalArrangement = Arrangement.SpaceBetween
+            .padding(
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            )
+            .background(Color(0xFFF7F2E7)),
+            verticalArrangement = Arrangement.SpaceBetween
     ) {
         // ENCABEZADO
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(100.dp)
                 .background(BrownDark)
-                .padding(vertical = 16.dp, horizontal = 16.dp)
+                .padding(horizontal = 16.dp)
+                .padding(top = 40.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -48,14 +53,14 @@ fun Modo_Cocina(navController: NavController) {
                         painter = painterResource(id = R.drawable.cat_icon), // Reemplazar con el ícono correspondiente
                         contentDescription = "Ícono de Modo Cocina",
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(50.dp)
                             .padding(end = 8.dp)
                     )
                     Text(
                         text = "Modo Cocina",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        fontSize = 30.sp
                     )
                 }
 
