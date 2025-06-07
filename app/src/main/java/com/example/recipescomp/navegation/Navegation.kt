@@ -4,7 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.recipescomp.screens.Principal
+import com.example.recipescomp.ResourcesApi.Meal
+import com.example.recipescomp.screens.home.HomeScreen
 import com.example.recipescomp.screens.Inicio_Login
 import com.example.recipescomp.auth.Registrarse
 import com.example.recipescomp.auth.Login_Principal
@@ -30,13 +31,14 @@ fun Navigation(){
             ListFavRec(navController)
         }
         composable("Principal"){
-            Principal(navController)
+            HomeScreen(navController)
         }
         composable("listaCompras"){
             Lista_Compras(navController)
         }
-        composable("receta"){
-            Receta(navController)
+        composable("receta") {
+            val meal = navController.previousBackStackEntry?.savedStateHandle?.get<Meal>("meal")
+            meal?.let { Receta(navController, it) }
         }
         composable("perfil"){
             Perfil(navController)

@@ -1,28 +1,16 @@
 package com.example.recipescomp.screens.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,13 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.ui.theme.BrownDark
 
-
 @Composable
-fun header(navController: NavController){
-
+fun HeaderSection(navController: NavController) {
     var busqueda by remember { mutableStateOf("") }
+    // 🟫 ENCABEZADO PRINCIPAL - Parte marrón superior
 
     Box(
         modifier = Modifier
@@ -55,7 +43,7 @@ fun header(navController: NavController){
     ) {
         Column(
             modifier = Modifier
-                .statusBarsPadding()
+                .statusBarsPadding() // ✅ Corregido para evitar que tape el status bar
                 .padding(16.dp)
         ) {
             // 👤 Bienvenida + ícono de perfil
@@ -138,4 +126,5 @@ fun header(navController: NavController){
             }
         }
     }
+
 }
