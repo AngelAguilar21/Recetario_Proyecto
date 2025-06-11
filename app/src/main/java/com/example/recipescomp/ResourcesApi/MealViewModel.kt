@@ -40,4 +40,24 @@ class MealViewModel : ViewModel() {
             }
         }
     }
+    fun fetchMealsByCategory(category: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Hacer la solicitud a la API para obtener recetas por categoría
+                val response = RetrofitClient.api.getMealsByCategory(category).execute()
+
+                if (response.isSuccessful) {
+                    // Si la respuesta es exitosa, obtenemos las recetas y las asignamos al estado
+                    response.body()?.meals?.let {
+                        withContext(Dispatchers.Main) {
+                            _meals.value = it
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                println("Error al obtener recetas: ${e.message}")
+                // En caso de error, puedes manejarlo aquí
+            }
+        }
+    }
 }
