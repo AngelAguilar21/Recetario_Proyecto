@@ -53,16 +53,15 @@ fun HeaderSection(navController: NavController) {
             ) {
 
                 Column {
-                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Bienvenido",
+                        text = "WELCOME CHEF",
                         color = Color.White,
-                        fontSize = 35.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(
-                        text = "los ingredientes te esperan...",
+                        text = "The ingredients await you...",
                         color = Color.White,
                         fontSize = 16.sp
                     )

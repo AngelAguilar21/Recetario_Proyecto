@@ -102,7 +102,7 @@ fun Registrarse(navController: NavController ) {
                         horizontalArrangement = Arrangement.Center
                     ) {
                         ReusableButtonLogin(
-                            text = "INGRESAR",
+                            text = "LOGIN",
                             isSelected = false,
                             onClick = { navController.navigate("Login_Principal") },
                             modifier = Modifier.weight(1f),
@@ -127,14 +127,14 @@ fun Registrarse(navController: NavController ) {
                 // El resto de los elementos como items separados con espacios automáticos
                 item {
                     ReusableText(
-                        "BIENVENIDO CHEF", 25.sp, MaterialTheme.typography.headlineSmall,
+                        "WELCOME CHEF", 25.sp, MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(bottom = 15.dp), color = Color.Black
                     )
                 }
 
                 item {
                     ReusableText(
-                        "Ingrese su informacion",
+                        "Enter your information",
                         14.sp,
                         MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 15.dp),
@@ -146,7 +146,7 @@ fun Registrarse(navController: NavController ) {
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
-                        label = { Text("Nombre de Usuario") },
+                        label = { Text("USER NAME") },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -157,7 +157,7 @@ fun Registrarse(navController: NavController ) {
                     ReusableLoginTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = "Nombre de Usuario",
+                        label = "EMAIL",
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -168,7 +168,7 @@ fun Registrarse(navController: NavController ) {
                     ReusableLoginTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = "Contraseña",
+                        label = "PASSWORD",
                         modifier = Modifier.fillMaxWidth(),
                         isPassword = true
                     )
@@ -178,7 +178,7 @@ fun Registrarse(navController: NavController ) {
 
                 item {
                     ReusableDropdown(
-                        label = "Tipo de Dieta",
+                        label = "Type of Diet",
                         options = dietOptions,
                         selected = selectedDiet,
                         onSelect = { selectedDiet = it },
@@ -191,7 +191,7 @@ fun Registrarse(navController: NavController ) {
 
                 item {
                     ReusableDropdown(
-                        label = "Nivel de cocina",
+                        label = "Cooking level",
                         options = cookingLevelOptions,
                         selected = selectedCookingLevel,
                         expanded = cookingLevelExpanded,
@@ -204,7 +204,7 @@ fun Registrarse(navController: NavController ) {
 
                 item {
                     ReusableDropdown(
-                        label = "Cocina Favorita",
+                        label = "Favorite Kitchen",
                         options = favoriteCuisineOptions,
                         selected = selectedFavoriteCuisine,
                         expanded = favoriteCuisineExpanded,
@@ -217,7 +217,7 @@ fun Registrarse(navController: NavController ) {
 
                 item {
                     ReusableButton(
-                        "REGISTRARSE",
+                        "REGISTER",
                         onClick = { navController.navigate("Login_Principal") })
                 }
             }

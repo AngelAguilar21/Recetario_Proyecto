@@ -37,12 +37,20 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
-            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(), bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item { HeaderSection(navController) }
-            item { FeaturesRecipesSection(navController, featuredMeals) }
-            item { CategoriesSection(navController) }
+            item {
+                HeaderSection(navController)
+            }
+            item {
+                FeaturesRecipesSection(navController, featuredMeals)
+                Spacer(modifier = Modifier.height(25.dp))
+            }
+            item {
+                CategoriesSection(navController)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             item{
                 Text(
                     "Otras recetas",

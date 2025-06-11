@@ -238,7 +238,6 @@ fun BackButton(
 @Composable
 fun RecipeCardFav(
     title: String,
-    imageUrl: String? = null,  // Puede ser nulo si no tienes una URL
     isFavoriteInitial: Boolean,
     onFavoriteClick: (Boolean) -> Unit = {},
     navController: NavController,

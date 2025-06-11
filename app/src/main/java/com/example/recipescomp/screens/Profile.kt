@@ -42,7 +42,7 @@ import com.example.recipescomp.ui.theme.BrownDark
 fun Perfil(navController: NavController) {
     Box(
         Modifier.fillMaxSize()
-        .padding(top = 10.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+        .padding(top = 40.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     ){
         Column(
             modifier = Modifier

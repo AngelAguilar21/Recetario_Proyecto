@@ -10,13 +10,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.recipescomp.ResourcesApi.Meal
 import com.example.recipescomp.ResourcesApi.MealViewModel
 import com.example.recipescomp.screens.home.HomeScreen
 import com.example.recipescomp.screens.Inicio_Login
 import com.example.recipescomp.auth.Registrarse
 import com.example.recipescomp.auth.Login_Principal
 import com.example.recipescomp.screens.*
+import com.example.recipescomp.screens.category.CategoryScreen
 import com.example.recipescomp.screens.shoppingList.*
 
 
@@ -44,6 +44,10 @@ fun Navigation(){
         }
         composable("listaCompras"){
             Lista_Compras(navController)
+        }
+        composable("category/{categoryName}") { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "Breakfast"
+            CategoryScreen(category = categoryName, navController = navController)
         }
         composable("receta/{mealId}") { backStackEntry ->
             val mealId = backStackEntry.arguments?.getString("mealId") ?: ""
