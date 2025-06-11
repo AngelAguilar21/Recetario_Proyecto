@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
 fun ReusableButton(
@@ -35,7 +36,7 @@ fun ReusableButton(
 ) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B3E15)),
+        colors = ButtonDefaults.buttonColors(containerColor = BrownDark),
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 15.dp)
@@ -238,7 +239,7 @@ fun BackButton(
 fun RecipeCardFav(
     title: String,
     isFavoriteInitial: Boolean,
-    onFavoriteClick: (Boolean) -> Unit = {} ,
+    onFavoriteClick: (Boolean) -> Unit = {},
     navController: NavController,
 ) {
     var isFavorite by remember { mutableStateOf(isFavoriteInitial) }

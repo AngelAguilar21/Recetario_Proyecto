@@ -74,11 +74,11 @@ fun Inicio_Login(navController: NavController){
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B3E15))
             ) {
-                Text(text = "INGRESAR", color = Color.White)
+                Text(text = "LOGIN", color = Color.White)
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "¿Eres nuevo? Regístrate",
+                text = "New here? Sign up",
                 color = Color.White,
                 fontSize = 14.sp,
                 modifier = Modifier.clickable {

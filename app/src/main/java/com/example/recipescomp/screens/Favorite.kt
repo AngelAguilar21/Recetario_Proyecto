@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
@@ -37,6 +39,7 @@ fun ListFavRec(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 16.dp, bottom = 70.dp)
+            .statusBarsPadding()
         ) {
             BackButton(onClick = { navController.popBackStack() })
 
@@ -56,8 +59,8 @@ fun ListFavRec(navController: NavController) {
                         title = title,
                         true,
                         navController = navController,
-                        onFavoriteClick = { isFav ->
-                            // Manejo de favorito si quieres
+                        onFavoriteClick = { //isFav ->
+                            //Manejo de favorito si quieres
                         }
                     )
                 }

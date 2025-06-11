@@ -1,90 +1,152 @@
 package com.example.recipescomp.screens
 
-import com.example.recipescomp.components.BackButton
-import com.example.recipescomp.components.BottomNavigationBar
-import com.example.recipescomp.components.ReusableButton
-import androidx.compose.ui.Alignment
-import androidx.compose.foundation.lazy.items
+
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.ResourcesApi.Meal
+import com.example.recipescomp.components.BottomNavigationBar
+import com.example.recipescomp.components.ReusableButton
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
-fun Receta(navController: NavController) {
+fun Receta(navController: NavController, meal: Meal) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("INGREDIENTES", "PASO A PASO")
-    var portions by remember { mutableStateOf(1) }
 
-    Box(modifier = Modifier.fillMaxSize().padding(top = 10.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())){
+    //variable favorite
+    val isFavorite = remember { mutableStateOf(false) }
+
+    // ✅ Armar lista de ingredientes válidos
+    val ingredientes = remember(meal) {
+        (1..20).mapNotNull { i ->
+            val ingredient = meal.javaClass.getDeclaredField("strIngredient$i").apply { isAccessible = true }.get(meal) as? String
+            val measure = meal.javaClass.getDeclaredField("strMeasure$i").apply { isAccessible = true }.get(meal) as? String
+            if (!ingredient.isNullOrBlank()) ingredient to (measure ?: "") else null
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+    ) {
+        // 🔳 CABECERA CON IMAGEN Y BOTÓN
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+        ) {
+            // 🖼 IMAGEN DE RECETA
+            Image(
+                painter = rememberAsyncImagePainter(meal.strMealThumb),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // 🔙 BOTÓN DE REGRESO SUPERPUESTO
+            Box(
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 30.dp)
+                    .size(40.dp)
+                    .background(Color.White.copy(alpha = 0.7f), shape = CircleShape)
+                    .clickable { navController.popBackStack() }
+                    .align(Alignment.TopStart), // lo ubica arriba a la izquierda
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Atrás",
+                    tint = BrownDark
+                )
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 100.dp)
+                .padding(bottom = 80.dp)
                 .padding(horizontal = 10.dp, vertical = 16.dp)
         ) {
-            BackButton(onClick = { navController.popBackStack() })
 
-            Box(
+            Spacer(modifier = Modifier.height(250.dp))
+
+            // 📝 SECCIÓN DE DESCRIPCIÓN DE LA RECETA (Nombre, categoría, región) + FAVORITO + CANTIDAD DE INGREDIENTES
+            Row(
+                verticalAlignment = Alignment.Top,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-            )
+                    .padding(horizontal = 10.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
+                    Text(
+                        text = meal.strMeal,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-            Text(
-                text = "NOMBRE DE LA RECETA",
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
+                    meal.strCategory?.let {
+                        Text("Categoría: $it", style = MaterialTheme.typography.bodySmall)
+                    }
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    meal.strArea?.let {
+                        Text("Región: $it", style = MaterialTheme.typography.bodySmall)
+                    }
 
-            Text(
-                text = "Descripción...",
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
+                    // 🧮 CANTIDAD DE INGREDIENTES
+                    Text(
+                        text = "Ingredientes: ${ingredientes.size}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(10.dp))
+                // ❤️ BOTÓN DE FAVORITO a la derecha
+                IconButton(
+                    onClick = {
+                        isFavorite.value = !isFavorite.value
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorito",
+                        tint = if (isFavorite.value) Color.Red else Color.Gray
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
 
+
+            // 📑 SECCIÓN DE TABS (INGREDIENTES / PASO A PASO)
             TabRow(
                 selectedTabIndex = selectedTab,
-                modifier = Modifier.padding(horizontal = 16.dp),
                 containerColor = Color.Transparent,
                 contentColor = BrownDark
             ) {
@@ -102,39 +164,17 @@ fun Receta(navController: NavController) {
                     )
                 }
             }
-            // CONTENIDO SCROLLABLE
-            when (selectedTab) {
-                0 -> {
-                    val ingredientes = listOf(
-                        "Ingrediente 1" to "Cantidad y Medida",
-                        "Ingrediente 2" to "Cantidad y Medida",
-                        "Ingrediente 3" to "Cantidad y Medida",
-                        "Ingrediente 4" to "Cantidad y Medida",
-                        "Ingrediente 5" to "Cantidad y Medida",
-                        "Ingrediente 6" to "Cantidad y Medida",
-                        "Ingrediente 7" to "Cantidad y Medida",
-                        "Ingrediente 8" to "Cantidad y Medida",
-                        "Ingrediente 9" to "Cantidad y Medida"
-                    )
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                    ) {
-                        item {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            ) {
-                                Text(
-                                    text = "$portions PORCIONES",
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-
+            // 📋 CONTENIDO DE INGREDIENTES O PASOS (SEGÚN TAB SELECCIONADA)
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                when (selectedTab) {
+                    0 -> {
+                        // 🧂 INGREDIENTES
                         items(ingredientes) { (name, measure) ->
                             Row(
                                 modifier = Modifier
@@ -149,20 +189,14 @@ fun Receta(navController: NavController) {
                             }
                         }
                     }
-                }
 
-                1 -> {
-                    val pasos = listOf("Paso 1", "Paso 2", "Paso 3", "Paso 4", "Paso 5", "Paso 6", "Paso 7", "Paso 8", "Paso 9", "Paso 10")
+                    1 -> {
+                        // 👣 PASO A PASO
+                        val pasos = meal.strInstructions?.split(Regex("\r?\n"))?.filter { it.isNotBlank() } ?: listOf("No hay instrucciones disponibles.")
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                    ) {
-                        itemsIndexed(pasos) { index, step ->
+                        items(pasos) { paso ->
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
+                                verticalAlignment = Alignment.Top,
                                 modifier = Modifier.padding(vertical = 6.dp)
                             ) {
                                 Box(
@@ -172,33 +206,40 @@ fun Receta(navController: NavController) {
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        "${index + 1}",
+                                        "${pasos.indexOf(paso) + 1}",
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
-                                Text(step)
+                                Text(paso)
                             }
                         }
                     }
                 }
             }
+
+            // 🍳 BOTÓN MODO COCINA
             ReusableButton(
                 "Modo Cocina",
                 onClick = { navController.navigate("modoCocina") },
                 modifier = Modifier.padding(horizontal = 30.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
         }
+
+        // 🔽 BARRA DE NAVEGACIÓN INFERIOR
         BottomNavigationBar(
             navController = navController,
             modifier = Modifier
-                .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .padding(bottom = 12.dp)
+                .padding(horizontal = 32.dp)
+                .clip(RoundedCornerShape(50))
                 .background(BrownDark)
-                .padding(vertical = 16.dp)
+                .shadow(10.dp, RoundedCornerShape(50))
+                .fillMaxWidth()
+                .height(64.dp)
         )
     }
 }
+

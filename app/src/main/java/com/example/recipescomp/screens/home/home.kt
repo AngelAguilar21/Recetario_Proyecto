@@ -1,82 +1,97 @@
 package com.example.recipescomp.screens.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.recipescomp.ResourcesApi.MealViewModel
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.background
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import com.example.recipescomp.ResourcesApi.MealViewModel
+import com.example.recipescomp.components.BottomNavigationBar
+import com.example.recipescomp.ui.theme.BrownDark
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.example.recipescomp.components.BottomNavigationBar
-import com.example.recipescomp.ui.theme.BrownDark
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Principal(navController: NavController, viewModel: MealViewModel = viewModel()){
-
+fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewModel()) {
     val meals = viewModel.meals.value
+    val shuffledMeals = meals.shuffled()
+    val featuredMeals = shuffledMeals.take(5)
+    val otherMeals = shuffledMeals.drop(5).take(13)
 
-    if (meals.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Cargando recetas...", color = Color.Gray)
-        }
-    }else {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                ).background(Color(0xFFF5F5F5))
-        ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                item{
-                    header(navController = navController)
-                }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF5F5F5))
+            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(), bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+    ) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item {
+                HeaderSection(navController)
+            }
+            item {
+                FeaturesRecipesSection(navController, featuredMeals)
+                Spacer(modifier = Modifier.height(25.dp))
+            }
+            item {
+                CategoriesSection(navController)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            item{
+                Text(
+                    "Otras recetas",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(start = 16.dp),
+                    color = BrownDark,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
 
+            }
+            if (otherMeals.isEmpty()) {
                 item {
-                    FeaturedMeals(meals = meals, navController = navController)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
                 }
-
-                item {
-                    Categories(navController = navController)
-                }
-
-                item {
-                    OtherMeals(meals = meals, navController = navController)
+            } else {
+                items(otherMeals) { meal ->
+                    OtherRecipeSection(meal = meal, navController = navController)
                 }
             }
-
-            BottomNavigationBar(
-                navController = navController,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp)
-                    .padding(horizontal = 32.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(BrownDark)
-                    .shadow(10.dp, RoundedCornerShape(50))
-                    .fillMaxWidth()
-                    .height(64.dp)
-            )
         }
+
+        BottomNavigationBar(
+            navController = navController,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp) // 🔼 lo eleva del borde inferior
+                .padding(horizontal = 32.dp) // 🔼 lo separa de los bordes laterales
+                .clip(RoundedCornerShape(50)) // 🟢 redondeado total
+                .background(BrownDark)
+                .shadow(10.dp, RoundedCornerShape(50)) // ✨ sombra flotante
+                .fillMaxWidth()
+                .height(64.dp) // 📏 altura fija opcional,
+        )
     }
 }
+

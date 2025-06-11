@@ -80,7 +80,7 @@ fun Login_Principal(navController: NavController){
                     horizontalArrangement = Arrangement.Center
                 ) {
                     ReusableButtonLogin(
-                        text = "INGRESAR",
+                        text = "LOGIN",
                         isSelected = isLogin,
                         onClick = { isLogin = true },
                         modifier = Modifier.weight(1f),
@@ -90,7 +90,7 @@ fun Login_Principal(navController: NavController){
                     Spacer(modifier = Modifier.width(8.dp))
 
                     ReusableButtonLogin(
-                        text = "REGISTRARSE",
+                        text = "REGISTER",
                         isSelected = !isLogin,
                         onClick = { navController.navigate("Registrarse") },
                         modifier = Modifier.weight(1f),
@@ -101,7 +101,7 @@ fun Login_Principal(navController: NavController){
                         fontSize = 10.sp
                     )
                 }
-                ReusableText("BIENVENIDO CHEF",30.sp, MaterialTheme.typography.headlineSmall,
+                ReusableText("WELCOME CHEF",30.sp, MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 30.dp), color=Color.Black)
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -109,7 +109,7 @@ fun Login_Principal(navController: NavController){
                 ReusableLoginTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = "Nombre de Usuario",
+                    label = "User name",
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -118,14 +118,14 @@ fun Login_Principal(navController: NavController){
                 ReusableLoginTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = "Contraseña",
+                    label = "Password",
                     modifier = Modifier.fillMaxWidth(),
                     isPassword = true
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                ReusableButton("Ingresar", onClick = {
+                ReusableButton("LOGIN", onClick = {
                     navController.navigate("Principal")
                 })
             }
