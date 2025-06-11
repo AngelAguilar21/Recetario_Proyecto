@@ -86,41 +86,28 @@ fun HeaderSection(navController: NavController) {
                 }
             }
 
-            // 🔍 Barra de búsqueda + botón de filtro
+            // 🔍 Barra de búsqueda
             Spacer(modifier = Modifier.height(20.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                    // Al hacer clic, navegamos a la pantalla de búsqueda
+                    navController.navigate("search")
+                    },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextField(
-                    value = busqueda,
-                    onValueChange = { busqueda = it },
-                    placeholder = { Text("Buscar", color = Color.Gray) },
-                    leadingIcon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Ícono de búsqueda",
-                            tint = Color.Gray
-                        )
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(2f)
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Ícono de búsqueda",
+                    tint = Color.Gray,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = {
-                        // Acción al hacer clic
-                    },
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(Color.White, RoundedCornerShape(12.dp))
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FormatListNumbered,
-                        contentDescription = "Ícono de búsqueda",
-                        tint = Color.Gray
-                    )
-                }
+                Text(
+                    text = "Buscar recetas...",
+                    color = Color.Gray,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.example.recipescomp.ResourcesApi
+package com.example.recipescomp.resourcesApi
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +57,20 @@ class MealViewModel : ViewModel() {
             } catch (e: Exception) {
                 println("Error al obtener recetas: ${e.message}")
                 // En caso de error, puedes manejarlo aquí
+            }
+        }
+    }
+    fun searchMeals(query: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val response = RetrofitClient.api.searchMeals(query).execute()
+                if (response.isSuccessful) {
+                    response.body()?.meals?.let {
+                        _meals.value = it // Asigna una lista de Meal al estado
+                    }
+                }
+            } catch (e: Exception) {
+                println("Error al realizar la búsqueda: ${e.message}")
             }
         }
     }

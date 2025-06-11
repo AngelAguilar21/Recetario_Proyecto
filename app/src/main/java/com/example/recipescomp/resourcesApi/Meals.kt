@@ -1,4 +1,4 @@
-package com.example.recipescomp.ResourcesApi
+package com.example.recipescomp.resourcesApi
 
 data class MealResponse(
     val meals: List<Meal>
