@@ -6,7 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -44,73 +44,85 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                 bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             )
     ) {
-        // Campo de texto para ingresar la búsqueda
-        TextField(
-            value = searchQuery.value,
-            onValueChange = { searchQuery.value = it },
-            placeholder = { Text("Buscar recetas...", color = Color.Gray) },
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = "Ícono de búsqueda",
-                    tint = Color.Gray
-                )
-            },
-            shape = RoundedCornerShape(12.dp),
+        // Fila que contiene la barra de búsqueda y el icono de filtro
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-            textStyle = MaterialTheme.typography.bodyLarge
-        )
-
-        // Icono de filtro
-        IconButton(
-            onClick = {
-                showFilterDialog.value = true  // Muestra el cuadro de diálogo de filtros
-            },
-            modifier = Modifier
-                .size(56.dp)
-                .background(Color.White, RoundedCornerShape(12.dp))
-                .align(Alignment.End)
-                .padding(8.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.FilterList,
-                contentDescription = "Ícono de filtros",
-                tint = Color.Gray
+            // Barra de búsqueda
+            TextField(
+                value = searchQuery.value,
+                onValueChange = { searchQuery.value = it },
+                placeholder = { Text("Buscar recetas...", color = Color.LightGray) },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "Ícono de búsqueda",
+                        tint = Color.Gray
+                    )
+                },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .weight(1f)  // Esto asegura que ocupe el espacio restante en la fila
+                    .background(Color.White)
+                    .padding(horizontal = 10.dp),
+                textStyle = MaterialTheme.typography.bodyLarge
             )
-        }
 
-        // Mostrar filtros en un cuadro de diálogo
-        if (showFilterDialog.value) {
-            FilterDialog(onDismiss = { showFilterDialog.value = false }, onApplyFilters = { category ->
-                // Aplica el filtro (en este caso, por categoría)
-                viewModel.fetchMealsByCategory(category)
-                showFilterDialog.value = false
-            })
+            // Icono de filtro
+            IconButton(
+                onClick = { showFilterDialog.value = true },
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(Color.LightGray, RoundedCornerShape(12.dp))
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FilterList,
+                    contentDescription = "Ícono de filtros",
+                    tint = Color.Gray
+                )
+            }
         }
 
         // Botón de búsqueda
         Button(
             onClick = { viewModel.searchMeals(searchQuery.value.text) },
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(16.dp)
-                .align(Alignment.CenterHorizontally)
+                .align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF3E2723), // Cambia el color de fondo del botón
+                contentColor = Color.White // Cambia el color del texto del botón
+            )
         ) {
             Text("Buscar")
         }
 
+        // Mostrar el cuadro de diálogo de filtros
+        if (showFilterDialog.value) {
+            FilterDialog(onDismiss = { showFilterDialog.value = false }, onApplyFilters = { category ->
+                // Aplicamos el filtro
+                viewModel.fetchMealsByCategory(category) // Actualiza las recetas según la categoría seleccionada
+                showFilterDialog.value = false
+            })
+        }
+
         // Mostrar resultados de la búsqueda
         if (meals.isNotEmpty()) {
-            LazyRow(
+            LazyColumn(
                 contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(meals) { meal ->
                     Box(
                         modifier = Modifier
-                            .size(160.dp)
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
                             .shadow(6.dp, shape = RoundedCornerShape(20.dp))
                             .clip(RoundedCornerShape(16.dp))
                             .clickable {
@@ -150,12 +162,11 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                 color = BrownDark,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(16.dp)
+                    .padding(16.dp, 32.dp)  // Aumenté el padding superior e inferior para un mejor espaciado
             )
         }
     }
 }
-
 @Composable
 fun FilterDialog(onDismiss: () -> Unit, onApplyFilters: (String) -> Unit) {
     var selectedCategory by remember { mutableStateOf("Desayuno") }
@@ -165,6 +176,7 @@ fun FilterDialog(onDismiss: () -> Unit, onApplyFilters: (String) -> Unit) {
         title = { Text("Filtrar por categoría") },
         text = {
             Column {
+                // Lista de categorías para elegir
                 val categories = listOf("Desayuno", "Postre", "Almuerzo", "Bebida", "Saludable")
                 categories.forEach { category ->
                     Row(
@@ -173,7 +185,7 @@ fun FilterDialog(onDismiss: () -> Unit, onApplyFilters: (String) -> Unit) {
                             .fillMaxWidth()
                             .padding(8.dp)
                             .clickable {
-                                selectedCategory = category
+                                selectedCategory = category // Seleccionar la categoría
                             }
                     ) {
                         RadioButton(
@@ -189,8 +201,8 @@ fun FilterDialog(onDismiss: () -> Unit, onApplyFilters: (String) -> Unit) {
         confirmButton = {
             TextButton(
                 onClick = {
-                    onApplyFilters(selectedCategory)
-                    onDismiss()
+                    onApplyFilters(selectedCategory) // Aplica el filtro con la categoría seleccionada
+                    onDismiss() // Cierra el cuadro de diálogo
                 }
             ) {
                 Text("Aplicar")
@@ -198,7 +210,7 @@ fun FilterDialog(onDismiss: () -> Unit, onApplyFilters: (String) -> Unit) {
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text("Cancelar") // Cancela el filtro
             }
         }
     )
