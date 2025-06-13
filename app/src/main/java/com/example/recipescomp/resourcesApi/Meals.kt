@@ -1,21 +1,22 @@
 package com.example.recipescomp.resourcesApi
 
+// Respuestas existentes
 data class MealResponse(
-    val meals: List<Meal>
+    val meals: List<Meal>?
 )
 
 data class Meal(
     val idMeal: String,
     val strMeal: String,
-    val strDrinkAlternate: String?,          // Opción alternativa (bebida)
-    val strCategory: String?,                // Categoría (ej. Beef, Chicken)
-    val strArea: String?,                    // Origen (ej. Mexican, Italian)
-    val strInstructions: String?,            // ✅ Instrucciones completas
-    val strMealThumb: String,                // ✅ Imagen
-    val strTags: String?,                    // Tags separadas por coma
-    val strYoutube: String?,                 // ✅ Video tutorial de YouTube
+    val strDrinkAlternate: String?,
+    val strCategory: String?,
+    val strArea: String?,
+    val strInstructions: String?,
+    val strMealThumb: String,
+    val strTags: String?,
+    val strYoutube: String?,
 
-    // ✅ Ingredientes y medidas (hasta 20)
+    // Ingredientes y medidas (hasta 20)
     val strIngredient1: String?, val strMeasure1: String?,
     val strIngredient2: String?, val strMeasure2: String?,
     val strIngredient3: String?, val strMeasure3: String?,
@@ -38,5 +39,29 @@ data class Meal(
     val strIngredient20: String?, val strMeasure20: String?
 )
 
+// Nuevas clases de datos para filtros
+data class CategoryResponse(
+    val meals: List<Category>?
+)
 
+data class Category(
+    val strCategory: String
+)
 
+data class AreaResponse(
+    val meals: List<Area>?
+)
+
+data class Area(
+    val strArea: String
+)
+
+data class IngredientResponse(
+    val meals: List<Ingredient>?
+)
+
+data class Ingredient(
+    val strIngredient: String,
+    val strDescription: String?,
+    val strType: String?
+)
