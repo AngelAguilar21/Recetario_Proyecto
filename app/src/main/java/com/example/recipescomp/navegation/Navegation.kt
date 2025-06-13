@@ -10,14 +10,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.recipescomp.ResourcesApi.MealViewModel
 import com.example.recipescomp.screens.home.HomeScreen
 import com.example.recipescomp.screens.Inicio_Login
 import com.example.recipescomp.auth.Registrarse
 import com.example.recipescomp.auth.Login_Principal
 import com.example.recipescomp.screens.*
 import com.example.recipescomp.screens.category.CategoryScreen
+import com.example.recipescomp.screens.home.SearchScreen
 import com.example.recipescomp.screens.shoppingList.*
+import com.example.recipescomp.resourcesApi.MealViewModel
 
 
 
@@ -73,20 +74,12 @@ fun Navigation(){
             Modo_Cocina(navController)
         }
 
-        composable("search"){
-            SearchScreen(navController)
+        composable("search") {
+            SearchScreen(navController, mealViewModel)
         }
         composable("lista_ingredientes"){
             ListaIngredientes(navController)
         }
 
-        composable("result"){
-            ResultScreen(navController)
-        }
-
-        composable("search")
-        {
-            SearchScreen(navController)
-        }
     }
 }

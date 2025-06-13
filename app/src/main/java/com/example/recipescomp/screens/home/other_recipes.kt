@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.recipescomp.ResourcesApi.Meal
+import com.example.recipescomp.resourcesApi.Meal
 @Composable
 fun OtherRecipeSection(meal: Meal, navController: NavController) {
     val favorites = remember { mutableStateListOf<String>() }

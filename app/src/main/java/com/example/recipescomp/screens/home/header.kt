@@ -2,20 +2,16 @@ package com.example.recipescomp.screens.home
 
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,9 +24,6 @@ import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
 fun HeaderSection(navController: NavController) {
-    var busqueda by remember { mutableStateOf("") }
-    // 🟫 ENCABEZADO PRINCIPAL - Parte marrón superior
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -86,41 +79,32 @@ fun HeaderSection(navController: NavController) {
                 }
             }
 
-            // 🔍 Barra de búsqueda + botón de filtro
+            // 🔍 Barra de búsqueda
             Spacer(modifier = Modifier.height(20.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                    // Al hacer clic, navegamos a la pantalla de búsqueda
+                    navController.navigate("search")
+                    }
+                    .padding(10.dp)
+                    .background(Color.White, shape = RoundedCornerShape(16.dp))
+                    .height(50.dp)
+                    .border(2.dp, Color.Gray, RoundedCornerShape(16.dp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextField(
-                    value = busqueda,
-                    onValueChange = { busqueda = it },
-                    placeholder = { Text("Buscar", color = Color.Gray) },
-                    leadingIcon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Ícono de búsqueda",
-                            tint = Color.Gray
-                        )
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.weight(2f)
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Ícono de búsqueda",
+                    tint = Color.Gray,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = {
-                        // Acción al hacer clic
-                    },
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(Color.White, RoundedCornerShape(12.dp))
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FormatListNumbered,
-                        contentDescription = "Ícono de búsqueda",
-                        tint = Color.Gray
-                    )
-                }
+                Text(
+                    text = "Buscar recetas...",
+                    color = Color.Gray,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
         }
     }
