@@ -1,6 +1,5 @@
 package com.example.recipescomp.screens
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -29,14 +31,17 @@ import com.example.recipescomp.resourcesApi.Meal
 import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.components.ReusableButton
 import com.example.recipescomp.ui.theme.BrownDark
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.local.ShoppingItemEntity
+import kotlinx.coroutines.launch
 
 @Composable
 fun Receta(navController: NavController, meal: Meal) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("INGREDIENTES", "PASO A PASO")
 
-    //variable favorite
     val isFavorite = remember { mutableStateOf(false) }
+    val isInShoppingList = remember { mutableStateOf(false) }
 
     // ✅ Armar lista de ingredientes válidos
     val ingredientes = remember(meal) {
@@ -47,11 +52,13 @@ fun Receta(navController: NavController, meal: Meal) {
         }
     }
 
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     ) {
         // 🔳 CABECERA CON IMAGEN Y BOTÓN
         Box(
@@ -63,8 +70,7 @@ fun Receta(navController: NavController, meal: Meal) {
             Image(
                 painter = rememberAsyncImagePainter(meal.strMealThumb),
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
@@ -75,7 +81,7 @@ fun Receta(navController: NavController, meal: Meal) {
                     .size(40.dp)
                     .background(Color.White.copy(alpha = 0.7f), shape = CircleShape)
                     .clickable { navController.popBackStack() }
-                    .align(Alignment.TopStart), // lo ubica arriba a la izquierda
+                    .align(Alignment.TopStart),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -85,13 +91,13 @@ fun Receta(navController: NavController, meal: Meal) {
                 )
             }
         }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 80.dp)
                 .padding(horizontal = 10.dp, vertical = 16.dp)
         ) {
-
             Spacer(modifier = Modifier.height(250.dp))
 
             // 📝 SECCIÓN DE DESCRIPCIÓN DE LA RECETA (Nombre, categoría, región) + FAVORITO + CANTIDAD DE INGREDIENTES
@@ -102,8 +108,7 @@ fun Receta(navController: NavController, meal: Meal) {
                     .padding(horizontal = 10.dp)
             ) {
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = meal.strMeal,
@@ -128,21 +133,53 @@ fun Receta(navController: NavController, meal: Meal) {
                     )
                 }
 
-                // ❤️ BOTÓN DE FAVORITO a la derecha
-                IconButton(
-                    onClick = {
-                        isFavorite.value = !isFavorite.value
-                    }
+                // ❤️ + 🛒 BOTONES DE ACCIÓN
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorito",
-                        tint = if (isFavorite.value) Color.Red else Color.Gray
-                    )
+                    // ❤️ BOTÓN DE FAVORITO
+                    IconButton(
+                        onClick = {
+                            isFavorite.value = !isFavorite.value
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Favorito",
+                            tint = if (isFavorite.value) Color.Red else Color.Gray
+                        )
+                    }
+
+                    // 🛒 BOTÓN DE AÑADIR A LISTA DE COMPRAS (local con Room)
+                    IconButton(
+                        onClick = {
+                            isInShoppingList.value = !isInShoppingList.value
+                            if (isInShoppingList.value) {
+                                val ingredientesStr = ingredientes.joinToString(", ") { "${it.first} (${it.second})" }
+                                val item = ShoppingItemEntity(
+                                    mealId = meal.idMeal ?: "",
+                                    name = meal.strMeal,
+                                    imageUrl = meal.strMealThumb ?: "",
+                                    ingredients = ingredientesStr
+                                )
+                                scope.launch {
+                                    val db = AppDatabase.getInstance(context)
+                                    db.ShoppingListDao().insertItem(item)
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isInShoppingList.value) Icons.Filled.ShoppingCart else Icons.Outlined.ShoppingCart,
+                            contentDescription = "Lista de compras",
+                            tint = if (isInShoppingList.value) BrownDark else Color.Gray
+                        )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
 
+            Spacer(modifier = Modifier.height(16.dp))
 
             // 📑 SECCIÓN DE TABS (INGREDIENTES / PASO A PASO)
             TabRow(
@@ -242,4 +279,5 @@ fun Receta(navController: NavController, meal: Meal) {
         )
     }
 }
+
 

@@ -1,103 +1,156 @@
 package com.example.recipescomp.screens.shoppingList
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.recipescomp.R
-import com.example.recipescomp.shared.ListaDeComprasState
+import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.components.BottomNavigationBar
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.local.ShoppingItemEntity
 import com.example.recipescomp.ui.theme.BrownDark
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Lista_Compras(navController: NavController) {
-    val recetas = remember { ListaDeComprasState.recetasSeleccionadas }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var items by remember { mutableStateOf<List<ShoppingItemEntity>>(emptyList()) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = "Lista de Compras",
-            fontSize = 30.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(BrownDark)
-                .padding(16.dp),
-            color = Color.White
-        )
+    // 🚀 Cargar recetas guardadas en Room al iniciar la pantalla
+    fun cargarDesdeRoom() {
+        scope.launch {
+            val db = AppDatabase.getInstance(context)
+            items = db.ShoppingListDao().getAllItems()
+        }
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
+    LaunchedEffect(true) {
+        cargarDesdeRoom()
+    }
 
-        if (recetas.isEmpty()) {
-            Text("NO SE HA SELECCIONADO NINGUNA RECETA", fontSize = 20.sp, color = Color.Gray)
+    Scaffold(
+        topBar = {
+            // 🧭 Barra superior con botón de regreso
+            TopAppBar(
+                title = { Text("Lista de Compras", color = Color.White) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = BrownDark)
+            )
+        },
+        bottomBar = {
+            // ⬇️ Barra inferior de navegación
+            BottomNavigationBar(navController = navController)
+        }
+    ) { padding ->
+        if (items.isEmpty()) {
+            // 📭 Mensaje si no hay recetas guardadas
+            Box(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No has agregado recetas aún.", color = Color.Gray)
+            }
         } else {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(padding)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                recetas.forEach { receta ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color(0xFFF7F2E7), RoundedCornerShape(8.dp))
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
+                Text(
+                    text = "Recetas Seleccionadas",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp),
+                    color = BrownDark
+                )
+
+                // 📝 Lista de recetas guardadas con imagen y botón eliminar
+                LazyColumn(modifier = Modifier.padding(horizontal = 16.dp).weight(1f)) {
+                    items(items) { item ->
+                        Card(
                             modifier = Modifier
-                                .size(80.dp)
-                                .background(Color.Gray, RoundedCornerShape(8.dp)),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F2E7))
                         ) {
-                            Text("No Image", color = Color.White, fontSize = 12.sp)
-                        }
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // 🍽 Imagen de la receta
+                                Image(
+                                    painter = rememberAsyncImagePainter(item.imageUrl),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(90.dp)
+                                        .background(Color.LightGray, RoundedCornerShape(12.dp))
+                                )
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
 
-                        Text(
-                            text = receta.nombre,
-                            fontSize = 18.sp,
-                            color = BrownDark,
-                            modifier = Modifier.weight(1f)
-                        )
+                                // 📝 Nombre e ingredientes
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = item.name, fontSize = 18.sp, color = BrownDark)
+                                    Text(text = item.ingredients, fontSize = 14.sp, color = Color.DarkGray)
+                                }
 
-                        IconButton(
-                            onClick = { ListaDeComprasState.recetasSeleccionadas.remove(receta) }
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_delete),
-                                contentDescription = "Eliminar",
-                                tint = Color.Red
-                            )
+                                // 🗑 Botón de eliminar receta
+                                IconButton(
+                                    onClick = {
+                                        scope.launch {
+                                            val db = AppDatabase.getInstance(context)
+                                            db.ShoppingListDao().deleteItem(item)
+                                            cargarDesdeRoom() // recargar lista
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Eliminar",
+                                        tint = Color.Red
+                                    )
+                                }
+                            }
                         }
                     }
                 }
+
+                // 🧾 Botón "Generar Lista" al fondo
+                Button(
+                    onClick = { navController.navigate("summary_list") },
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(0.6f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
+                ) {
+                    Text("Generar Lista", fontSize = 16.sp, color = Color.White)
+                }
             }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { navController.navigate("lista_ingredientes") },
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
-        ) {
-            Text("Generar Lista", fontSize = 18.sp, color = Color.White)
         }
     }
 }
+
