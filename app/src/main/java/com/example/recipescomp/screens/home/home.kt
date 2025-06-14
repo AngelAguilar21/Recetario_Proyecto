@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.recipescomp.ResourcesApi.MealViewModel
+import com.example.recipescomp.resourcesApi.MealViewModel
 import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.ui.theme.BrownDark
 import androidx.compose.foundation.lazy.items
@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.sp
 fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewModel()) {
     val meals = viewModel.meals.value
     val shuffledMeals = meals.shuffled()
-    val featuredMeals = shuffledMeals.take(5)
+    val featuredMeals = shuffledMeals.take(10)
     val otherMeals = shuffledMeals.drop(5).take(13)
 
     val context = LocalContext.current

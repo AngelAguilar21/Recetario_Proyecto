@@ -30,10 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.recipescomp.ResourcesApi.Meal
 import com.example.recipescomp.data.local.FavoriteRecipesEntity
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
-
+import com.example.recipescomp.resourcesApi.Meal
 @Composable
 fun OtherRecipeSection(
     meal: Meal,
