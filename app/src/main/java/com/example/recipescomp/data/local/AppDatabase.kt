@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [FavoriteRecipesEntity::class], version = 1)
+@Database(entities = [FavoriteRecipesEntity::class], version = 3)
 abstract class AppDatabase: RoomDatabase(){
     abstract fun FavoriteRecipesDao(): FavoriteRecipesDao
 
@@ -14,13 +14,17 @@ abstract class AppDatabase: RoomDatabase(){
         private var INSTANCE : AppDatabase?=null
 
         fun getInstance(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this){
+            return INSTANCE ?: synchronized(this) {
                 Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "recipe_database"
-                ).build().also { INSTANCE = it }
+                )
+                    .fallbackToDestructiveMigration() // 🧨 agrega esta línea
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
+
     }
 }

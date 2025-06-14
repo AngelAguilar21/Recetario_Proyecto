@@ -19,9 +19,13 @@ data class FavoriteRecipeViewModel(private val repository: FavoriteRecipeReposit
 
     fun insertFavorite(recipe: FavoriteRecipesEntity){
         viewModelScope.launch {
-            repository.insert(recipe)
+            val current = favorites.value
+            if (current.none { it.name == recipe.name }) {
+                repository.insert(recipe)
+            }
         }
     }
+
     fun deleteFavorite(name: String) {
         viewModelScope.launch {
             repository.deleteByName(name)
@@ -32,4 +36,5 @@ data class FavoriteRecipeViewModel(private val repository: FavoriteRecipeReposit
             repository.delete(recipe)
         }
     }
+
 }
