@@ -15,6 +15,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,21 +30,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.data.local.FavoriteRecipesEntity
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.resourcesApi.Meal
 @Composable
-fun OtherRecipeSection(meal: Meal, navController: NavController) {
-    val favorites = remember { mutableStateListOf<String>() }
-    if (meal == null) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
-        return
-    }
+fun OtherRecipeSection(
+    meal: Meal,
+    navController: NavController,
+    viewModel: FavoriteRecipeViewModel
+) {
+    val favorites by viewModel.favorites.collectAsState()
+    val isFav = favorites.any { it.mealId == meal.idMeal }
 
     Row(
         modifier = Modifier
@@ -75,17 +73,9 @@ fun OtherRecipeSection(meal: Meal, navController: NavController) {
                 color = Color.Gray
             )
 
+            // Puedes mejorar este contador si tienes los ingredientes reales
             val ingredientCount = listOf(
-                meal.strIngredient1,
-                meal.strIngredient2,
-                meal.strIngredient3,
-                meal.strIngredient4,
-                meal.strIngredient5,
-                meal.strIngredient6,
-                meal.strIngredient7,
-                meal.strIngredient8,
-                meal.strIngredient9,
-                meal.strIngredient10
+                meal.strIngredient1, meal.strIngredient2, meal.strIngredient3
             ).count { !it.isNullOrBlank() }
 
             Text(
@@ -97,21 +87,24 @@ fun OtherRecipeSection(meal: Meal, navController: NavController) {
 
         IconButton(
             onClick = {
-                if (favorites.contains(meal.idMeal)) favorites.remove(meal.idMeal)
-                else favorites.add(meal.idMeal)
+                if (isFav) viewModel.deleteFavorite(meal.strMeal)
+                else viewModel.insertFavorite(
+                    FavoriteRecipesEntity(
+                        mealId = meal.idMeal,
+                        name = meal.strMeal,
+                        imageUrl = meal.strMealThumb
+                    )
+                )
             },
             modifier = Modifier.align(Alignment.Bottom)
         ) {
             Icon(
-                imageVector = if (favorites.contains(meal.idMeal)) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                imageVector = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = "Favorito",
-                tint = if (favorites.contains(meal.idMeal)) Color.Red else Color.Gray
+                tint = if (isFav) Color.Red else Color.Gray
             )
         }
     }
-
-
 }
-
 
 

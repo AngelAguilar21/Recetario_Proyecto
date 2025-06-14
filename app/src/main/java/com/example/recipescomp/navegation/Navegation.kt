@@ -15,8 +15,8 @@ import com.example.recipescomp.screens.Inicio_Login
 import com.example.recipescomp.auth.Registrarse
 import com.example.recipescomp.auth.Login_Principal
 import com.example.recipescomp.screens.*
+import com.example.recipescomp.screens.category.CategoryScreen
 import com.example.recipescomp.screens.home.SearchScreen
-import com.example.recipescomp.screens.shoppingList.*
 import com.example.recipescomp.resourcesApi.MealViewModel
 
 
@@ -46,10 +46,6 @@ fun Navigation(){
             Lista_Compras(navController)
         }
 
-        composable("summary_list") {
-            SummaryListScreen(navController)
-        }
-
         composable("receta/{mealId}") { backStackEntry ->
             val mealId = backStackEntry.arguments?.getString("mealId") ?: ""
             val meal = mealViewModel.meals.value.find { it.idMeal == mealId }
@@ -76,6 +72,9 @@ fun Navigation(){
 
         composable("search") {
             SearchScreen(navController, mealViewModel)
+        }
+        composable("lista_ingredientes"){
+            ListaIngredientes(navController)
         }
 
     }

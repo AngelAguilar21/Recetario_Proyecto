@@ -1,5 +1,7 @@
 package com.example.recipescomp.components
-
+import androidx.compose.ui.layout.ContentScale
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
@@ -238,9 +241,11 @@ fun BackButton(
 @Composable
 fun RecipeCardFav(
     title: String,
+    imageUrl: String?,
     isFavoriteInitial: Boolean,
     onFavoriteClick: (Boolean) -> Unit = {},
     navController: NavController,
+    onClick: () -> Unit,
 ) {
     var isFavorite by remember { mutableStateOf(isFavoriteInitial) }
 
@@ -252,24 +257,39 @@ fun RecipeCardFav(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(bottom = 12.dp)) {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .clip(RoundedCornerShape(12.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.LightGray)
+                    .clickable {
+                        onClick()
+                    }
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.LightGray)
-                        .clickable {
-                            navController.navigate("Receta")
-                        }
-                )
+                if (!imageUrl.isNullOrEmpty()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUrl),
+                        contentDescription = title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.LightGray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Sin Imagen", color = Color.DarkGray)
+                    }
+                }
             }
+
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -288,7 +308,6 @@ fun RecipeCardFav(
                         tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
             }
         }
     }
