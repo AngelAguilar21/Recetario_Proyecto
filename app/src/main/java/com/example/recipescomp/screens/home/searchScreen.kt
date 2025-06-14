@@ -4,6 +4,7 @@ import android.net.Uri
 import com.example.recipescomp.resourcesApi.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
@@ -45,21 +47,36 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
             )
     ) {
         // Header con título
-        Card(
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF3E2723))
+                .padding(16.dp)
         ) {
+            BackButton(onClick = { navController.popBackStack() })
+
+            Spacer(modifier = Modifier.width(8.dp)) // Espacio entre el ícono y el texto
+
             Text(
                 text = "Buscar Recetas",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                modifier = Modifier.padding(16.dp),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+                    .border(
+                        width = 2.dp,
+                        color = Color.White,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .background(
+                        color = Color(0xFF3E2723),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                        .padding(16.dp)
             )
         }
+
 
         // Fila de búsqueda y filtros
         Row(
