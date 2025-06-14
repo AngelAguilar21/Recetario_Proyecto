@@ -21,13 +21,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.ResourcesApi.Meal
 import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.components.ReusableButton
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.local.FavoriteRecipesEntity
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
@@ -35,8 +42,14 @@ fun Receta(navController: NavController, meal: Meal) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("INGREDIENTES", "PASO A PASO")
 
-    //variable favorite
-    val isFavorite = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val db = AppDatabase.getInstance(context)
+    val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+
+    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val favorites by viewModel.favorites.collectAsState()
+    val isFavorite = favorites.any { it.name == meal.strMeal }
+
 
     // ✅ Armar lista de ingredientes válidos
     val ingredientes = remember(meal) {
@@ -129,17 +142,24 @@ fun Receta(navController: NavController, meal: Meal) {
                 }
 
                 // ❤️ BOTÓN DE FAVORITO a la derecha
-                IconButton(
-                    onClick = {
-                        isFavorite.value = !isFavorite.value
-                    }
-                ) {
+                IconButton(onClick = {
+                    if (isFavorite) viewModel.deleteFavorite(meal.strMeal)
+                    else viewModel.insertFavorite(
+                        FavoriteRecipesEntity(
+                            mealId = meal.idMeal,
+                            name = meal.strMeal,
+                            imageUrl = meal.strMealThumb
+                        )
+                    )
+
+                }) {
                     Icon(
-                        imageVector = if (isFavorite.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Favorito",
-                        tint = if (isFavorite.value) Color.Red else Color.Gray
+                        tint = if (isFavorite) Color.Red else Color.Gray
                     )
                 }
+
             }
             Spacer(modifier = Modifier.height(16.dp))
 

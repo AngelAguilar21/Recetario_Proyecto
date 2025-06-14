@@ -1,55 +1,63 @@
 package com.example.recipescomp.screens
 
-import com.example.recipescomp.components.BackButton
-import com.example.recipescomp.components.BottomNavigationBar
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.components.BackButton
+import com.example.recipescomp.components.BottomNavigationBar
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
 fun Perfil(navController: NavController) {
+    val context = LocalContext.current
+    val db = AppDatabase.getInstance(context)
+    val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val favorites by viewModel.favorites.collectAsState()
+
     Box(
-        Modifier.fillMaxSize()
-        .padding(top = 40.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-    ){
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = 40.dp,
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            )
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
-                .padding(horizontal = 16.dp)
-        ) {
+                .padding(PaddingValues(start = 16.dp, end = 16.dp, bottom = 70.dp))
+        )
+        {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -67,9 +75,7 @@ fun Perfil(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -96,10 +102,7 @@ fun Perfil(navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Título "Recetas Favoritas" con estrella
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Recetas Favoritas",
                     fontWeight = FontWeight.Bold,
@@ -119,16 +122,39 @@ fun Perfil(navController: NavController) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(horizontal = 4.dp)
             ) {
-                items(5) {
-                    Box(
+                items(favorites) { fav ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .size(width = 100.dp, height = 140.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.LightGray)
-                            .clickable {
-                                navController.navigate("Receta")
-                            }
-                    )
+                            .width(100.dp)
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .height(100.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.LightGray)
+                                .clickable {
+                                    navController.navigate("receta/${fav.mealId}")
+                                }
+
+                        ) {
+                            Image(
+                                painter = rememberAsyncImagePainter(fav.imageUrl),
+                                contentDescription = fav.name,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = fav.name,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.DarkGray
+                        )
+                    }
                 }
             }
         }
@@ -143,5 +169,4 @@ fun Perfil(navController: NavController) {
                 .padding(vertical = 16.dp)
         )
     }
-
 }

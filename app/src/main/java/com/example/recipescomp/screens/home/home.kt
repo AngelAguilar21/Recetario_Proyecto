@@ -1,5 +1,11 @@
 package com.example.recipescomp.screens.home
 
+import androidx.compose.ui.platform.LocalContext
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
@@ -32,6 +38,12 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
     val shuffledMeals = meals.shuffled()
     val featuredMeals = shuffledMeals.take(5)
     val otherMeals = shuffledMeals.drop(5).take(13)
+
+    val context = LocalContext.current
+    val db = AppDatabase.getInstance(context)
+    val favoriteRepository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+    val favoriteViewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(favoriteRepository))
+
 
     Box(
         modifier = Modifier
@@ -75,8 +87,13 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
                 }
             } else {
                 items(otherMeals) { meal ->
-                    OtherRecipeSection(meal = meal, navController = navController)
+                    OtherRecipeSection(
+                        meal = meal,
+                        navController = navController,
+                        viewModel = favoriteViewModel
+                    )
                 }
+
             }
         }
 
