@@ -1,6 +1,6 @@
 package com.example.recipescomp.screens
 import androidx.compose.foundation.lazy.items
-import com.example.recipescomp.ResourcesApi.Meal
+import com.example.recipescomp.resourcesApi.Meal
 
 import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.components.BottomNavigationBar

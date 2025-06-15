@@ -22,6 +22,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.ShoppingItemEntity
+import com.example.recipescomp.data.local.ShoppingListDao
 import com.example.recipescomp.ui.theme.BrownDark
 import kotlinx.coroutines.launch
 
