@@ -1,14 +1,21 @@
 package com.example.recipescomp.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Text
 import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,20 +25,55 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.recipescomp.R
+import coil.compose.AsyncImage
+import com.example.recipescomp.resourcesApi.MealViewModel
 import com.example.recipescomp.ui.theme.BrownDark
+import com.google.accompanist.pager.*
+import kotlinx.coroutines.launch
+import com.example.recipescomp.R
+import com.airbnb.lottie.compose.*
 
+@OptIn(ExperimentalPagerApi::class, ExperimentalAnimationApi::class)
 @Composable
-fun Modo_Cocina(navController: NavController) {
+fun Modo_Cocina(
+    navController: NavController,
+    mealId: String,
+    viewModel: MealViewModel = viewModel()
+) {
+    val meal by viewModel.selectedMeal
+
+    LaunchedEffect(mealId) {
+        viewModel.fetchMealById(mealId)
+    }
+
+    if (meal == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Cargando receta...")
+        }
+        return
+    }
+
+    val pasos = meal?.strInstructions
+        ?.split("\n")
+        ?.filter { it.isNotBlank() }
+        ?: listOf("No hay instrucciones disponibles.")
+
+    val pagerState = rememberPagerState(initialPage = 0)
+    val scope = rememberCoroutineScope()
+
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.cat_cook))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            )
             .background(Color(0xFFF7F2E7)),
-            verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         // ENCABEZADO
         Box(
@@ -84,132 +126,186 @@ fun Modo_Cocina(navController: NavController) {
             }
         }
 
-        // SECCIÓN DE INFORMACIÓN DE LA RECETA
+        // 🔲 Descripcion
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Título de la receta
-            Text(
-                text = "Chaufa", // Cambiado a "Chaufa"
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = BrownDark,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Etiquetas de categoría y dificultad
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Plato Fuerte", // Etiqueta de categoría
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier
-                        .background(Color(0xFFE1B38B), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                )
-                Text(
-                    text = "Intermedio", // Etiqueta de dificultad
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier
-                        .background(Color(0xFF76C05A), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Imagen decorativa cuadrada
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(BrownDark, RoundedCornerShape(16.dp))
-            )
-        }
-
-        // IMAGEN CENTRAL DEL PASO
-        Image(
-            painter = painterResource(id = R.drawable.sarten_icon), // Reemplazar con una imagen representativa del paso
-            contentDescription = "Paso actual",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .padding(horizontal = 16.dp)
-        )
-
-        // TEXTO DEL PASO ACTUAL
-        Text(
-            text = "Poner a calentar 2 cucharadas de aceite en una sartén grande.", // Primer paso dinámico
-            fontSize = 18.sp,
-            color = BrownDark,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
+                .background(Color(0xFFECE0D1))
                 .padding(16.dp)
-        )
-
-        // INDICADORES DE PROGRESO + BOTONES DE NAVEGACIÓN
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Indicadores de progreso
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                repeat(3) { index ->
-                    Box(
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AsyncImage(
+                    model = meal!!.strMealThumb,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(Color.LightGray, RoundedCornerShape(16.dp))
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = meal!!.strMeal,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = BrownDark
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = meal!!.strCategory ?: "Sin categoría",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .size(12.dp)
-                            .background(
-                                color = if (index == 0) BrownDark else Color.Gray,
-                                shape = CircleShape
-                            )
-                            .padding(4.dp)
+                            .background(Color(0xFFFFC107), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Botones de navegación
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Button(
-                    onClick = { /* Acción para ir al paso anterior */ },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = BrownDark
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = meal!!.strArea ?: "Sin país",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(Color(0xFF4CAF50), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
                     )
-                ) {
-                    Text(text = "Atrás", fontSize = 16.sp, color = Color.White)
-                }
-
-                Button(
-                    onClick = { /* Acción para ir al siguiente paso */ },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = BrownDark
-                    )
-                ) {
-                    Text(text = "Continuar", fontSize = 16.sp, color = Color.White)
                 }
             }
         }
+
+        // 📄 PANTALLAS DESLIZABLES (Pasos)
+        HorizontalPager(
+            count = pasos.size,
+            state = pagerState,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+            userScrollEnabled = false
+        ) { page ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.SpaceBetween, // 👈 Esto reparte arriba y abajo
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Imagen animada
+                LottieAnimation(
+                    composition = composition,
+                    progress = progress,
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                )
+
+
+                // Parte superior: Paso actual animado
+                AnimatedContent(
+                    targetState = pasos[page],
+                    transitionSpec = {
+                        slideInHorizontally { it } + fadeIn() with
+                                slideOutHorizontally { -it } + fadeOut()
+                    },
+                    label = "PasoAnimado"
+                ) { paso ->
+                    Text(
+                        text = paso,
+                        fontSize = 18.sp,
+                        color = BrownDark,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
+
+                // Parte inferior fija: Bolitas + Botones
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // 🔘 Indicador de progreso
+                    HorizontalPagerIndicator(
+                        pagerState = pagerState,
+                        activeColor = BrownDark,
+                        inactiveColor = Color.Gray,
+                        modifier = Modifier.padding(8.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (pagerState.currentPage == pasos.lastIndex) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            if (pagerState.currentPage > 0) {
+                                Button(
+                                    onClick = {
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
+                                ) {
+                                    Text("Anterior", color = Color.White, fontSize = 16.sp)
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.width(1.dp))
+                            }
+
+                            Button(
+                                onClick = {
+                                    navController.popBackStack()
+                                },
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
+                            ) {
+                                Text("Finalizar", color = Color.White, fontSize = 16.sp)
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            if (pagerState.currentPage > 0) {
+                                Button(
+                                    onClick = {
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
+                                ) {
+                                    Text("Anterior", color = Color.White, fontSize = 16.sp)
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.width(1.dp))
+                            }
+
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
+                                },
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
+                            ) {
+                                Text("Siguiente", color = Color.White, fontSize = 16.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
+
+
+

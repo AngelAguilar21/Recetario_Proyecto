@@ -1,6 +1,7 @@
 package com.example.recipescomp.screens
 
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -221,10 +222,13 @@ fun Receta(navController: NavController, meal: Meal) {
 
             // 🍳 BOTÓN MODO COCINA
             ReusableButton(
-                "Modo Cocina",
-                onClick = { navController.navigate("modoCocina") },
+                text = "Modo Cocina",
+                onClick = {
+                    navController.navigate("modoCocina/${meal.idMeal}")
+                },
                 modifier = Modifier.padding(horizontal = 30.dp)
             )
+
         }
 
         // 🔽 BARRA DE NAVEGACIÓN INFERIOR

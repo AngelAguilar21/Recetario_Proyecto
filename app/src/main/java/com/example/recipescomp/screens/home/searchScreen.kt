@@ -1,19 +1,21 @@
 package com.example.recipescomp.screens.home
 
-import android.net.Uri
-import com.example.recipescomp.resourcesApi.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,13 +24,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import androidx.navigation.NavController
+import com.example.recipescomp.resourcesApi.MealViewModel
 import com.example.recipescomp.ui.theme.BrownDark
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
     val searchQuery = remember { mutableStateOf(TextFieldValue("")) }
@@ -39,272 +46,234 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            )
+            .background(Color(0xFFF7F2E7))
     ) {
-        // Header con título
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF3E2723))
-        ) {
-            Text(
-                text = "Buscar Recetas",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.padding(16.dp),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        // Fila de búsqueda y filtros
+        // 🔺 Header con botón retroceder y barra de búsqueda
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .background(BrownDark)
+                .padding(
+                    top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 25.dp,
+                            start = 12.dp,
+                    end = 12.dp,
+                    bottom = 20.dp
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Barra de búsqueda
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.White, shape = CircleShape)
+                    .clickable { navController.popBackStack() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Volver",
+                    tint = BrownDark
+                )
+            }
+
+
+            // 📝 Barra de búsqueda
             OutlinedTextField(
                 value = searchQuery.value,
                 onValueChange = { searchQuery.value = it },
-                placeholder = { Text("Buscar recetas...", color = Color.Gray) },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = "Buscar",
-                        tint = Color.Gray
-                    )
-                },
+                placeholder = { Text("Buscar recetas...", color = BrownDark, fontSize = 15.sp) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp) // Ajusta aquí la altura como prefieras
+                    .weight(1f)
+                    .padding(start = 8.dp),
+                shape = RoundedCornerShape(12.dp),
+                textStyle = LocalTextStyle.current.copy(
+                    color = BrownDark,
+                    fontSize = 15.sp // Asegúrate de usar un tamaño que no se corte
+                ),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = BrownDark,
+                    unfocusedBorderColor = BrownDark,
+                    cursorColor = BrownDark,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedTextColor = BrownDark,
+                    unfocusedTextColor = BrownDark,
+                    focusedLeadingIconColor = BrownDark,
+                    unfocusedLeadingIconColor = BrownDark,
+                    focusedTrailingIconColor = BrownDark,
+                    unfocusedTrailingIconColor = BrownDark
+                ),
                 trailingIcon = {
                     if (searchQuery.value.text.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                searchQuery.value = TextFieldValue("")
-                                viewModel.clearFilters()
-                            }
-                        ) {
-                            Icon(
-                                Icons.Default.Clear,
-                                contentDescription = "Limpiar",
-                                tint = Color.Gray
-                            )
+                        IconButton(onClick = {
+                            searchQuery.value = TextFieldValue("")
+                            viewModel.clearFilters()
+                        }) {
+                            Icon(Icons.Default.Clear, contentDescription = "Limpiar", tint = BrownDark)
                         }
                     }
                 },
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.weight(1f),
                 singleLine = true
             )
 
-            // Botón de filtro
-            IconButton(
-                onClick = { showFilterDialog.value = true },
+
+
+            // 🔍 Botón pequeño para buscar
+            Box(
                 modifier = Modifier
-                    .size(56.dp)
-                    .background(
-                        Color(0xFF3E2723),
-                        RoundedCornerShape(12.dp)
-                    )
+                    .size(44.dp)
+                    .padding(start = 4.dp)
+                    .background(Color.White, RoundedCornerShape(12.dp))
+                    .clickable {
+                        if (searchQuery.value.text.isNotEmpty()) {
+                            viewModel.searchMeals(searchQuery.value.text)
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Buscar",
+                    tint = BrownDark
+                )
+            }
+
+            // ⚙️ Botón de filtro
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .padding(start = 4.dp)
+                    .background(Color.White, RoundedCornerShape(12.dp))
+                    .clickable { showFilterDialog.value = true },
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.FilterList,
                     contentDescription = "Filtros",
-                    tint = Color.White
+                    tint = BrownDark
                 )
             }
 
-            // Botón de receta aleatoria
-            IconButton(
-                onClick = { viewModel.getRandomMeal() },
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(
-                        Color(0xFF4CAF50),
-                        RoundedCornerShape(12.dp)
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Shuffle,
-                    contentDescription = "Receta aleatoria",
-                    tint = Color.White
-                )
-            }
         }
 
-        // Botones de acción
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+        // 🌿 Chips de filtros rápidos
+        val selectedChip = remember { mutableStateOf("Todo") }
+
+        LazyRow(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp)
         ) {
-            // Botón de búsqueda
-            Button(
-                onClick = {
-                    if (searchQuery.value.text.isNotEmpty()) {
-                        viewModel.searchMeals(searchQuery.value.text)
-                    }
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF3E2723),
-                    contentColor = Color.White
-                ),
-                enabled = searchQuery.value.text.isNotEmpty() && !isLoading
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Buscar")
-                }
-            }
-
-            // Botón limpiar filtros
-            OutlinedButton(
-                onClick = {
-                    searchQuery.value = TextFieldValue("")
-                    viewModel.clearFilters()
-                },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Limpiar")
+            items(listOf("Todo", "Aleatorio")) { label ->
+                val isSelected = selectedChip.value == label
+                FilterChip(
+                    selected = isSelected,
+                    onClick = {
+                        selectedChip.value = label
+                        if (label == "Todo") viewModel.fetchMeals()
+                        if (label == "Aleatorio") viewModel.getRandomMeals(3)
+                    },
+                    label = {
+                        Text(
+                            label,
+                            color = if (isSelected) Color.White else BrownDark,
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = BrownDark,
+                        containerColor = Color.White
+                    ),
+                    border = if (!isSelected) BorderStroke(1.dp, BrownDark) else null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
             }
         }
 
-        // Mostrar el cuadro de diálogo de filtros
-        if (showFilterDialog.value) {
-            FilterDialog(
-                viewModel = viewModel,
-                onDismiss = { showFilterDialog.value = false },
-                onApplyFilters = { category, area, ingredient ->
-                    viewModel.applyFilters(category, area, ingredient)
-                    showFilterDialog.value = false
-                }
+
+        // 📝 Texto de recetas encontradas
+        if (!isLoading && meals.isNotEmpty()) {
+            Text(
+                text = "Encontradas ${meals.size} recetas",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
             )
         }
 
-        // Mostrar loading
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(
-                        color = Color(0xFF3E2723),
-                        strokeWidth = 3.dp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        "Cargando recetas...",
-                        color = BrownDark,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-        }
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Mostrar los resultados
+        // 🍽️ Resultados de búsqueda
         if (!isLoading) {
             if (meals.isNotEmpty()) {
                 LazyColumn(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    item {
-                        Text(
-                            text = "Encontradas ${meals.size} recetas",
-                            fontSize = 14.sp,
-                            color = Color.Gray,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-
                     items(meals) { meal ->
                         Card(
+                            shape = RoundedCornerShape(16.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
                                 .clickable {
-                                    navController.navigate("receta/${Uri.encode(meal.idMeal)}")
+                                    navController.navigate("receta/${URLEncoder.encode(meal.idMeal, StandardCharsets.UTF_8.name())}")
                                 },
                             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                             colors = CardDefaults.cardColors(containerColor = Color.White)
                         ) {
-                            Box(modifier = Modifier.fillMaxSize()) {
+                            Column {
                                 Image(
                                     painter = rememberAsyncImagePainter(meal.strMealThumb),
                                     contentDescription = meal.strMeal,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(60.dp)
-                                        .align(Alignment.BottomCenter)
-                                        .background(
-                                            Color.Black.copy(alpha = 0.7f),
-                                            RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-                                        ),
-                                    contentAlignment = Alignment.Center
+                                        .height(130.dp)
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = meal.strMeal,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        modifier = Modifier.padding(8.dp),
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 2
-                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(meal.strMeal, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1)
+                                        Text("${meal.strCategory} • ${meal.strArea}", fontSize = 12.sp, color = Color.Gray)
+                                    }
+                                    IconButton(onClick = { /* TODO: marcar favorito */ }) {
+                                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorito")
+                                    }
                                 }
                             }
                         }
                     }
                 }
             } else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "🍽️",
-                            fontSize = 48.sp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "No se encontraron recetas",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = BrownDark
-                        )
-                        Text(
-                            text = "Intenta con otra búsqueda o filtro",
-                            fontSize = 14.sp,
-                            color = Color.Gray,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("🍽️", fontSize = 48.sp)
+                        Text("No se encontraron recetas", fontSize = 18.sp, color = Color.DarkGray)
+                        Text("Intenta con otra búsqueda o filtro", fontSize = 14.sp, color = Color.Gray)
                     }
                 }
             }
+        } else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFF3E2723))
+            }
+        }
+
+        // 🏰 Filtro lateral como mini ventana (tu mismo FilterDialog modificado)
+        if (showFilterDialog.value) {
+            FilterDialog(
+                viewModel = viewModel,
+                onDismiss = { showFilterDialog.value = false },
+                onApplyFilters = { cat, area, ing ->
+                    viewModel.applyFilters(cat, area, ing)
+                    showFilterDialog.value = false
+                }
+            )
         }
     }
 }

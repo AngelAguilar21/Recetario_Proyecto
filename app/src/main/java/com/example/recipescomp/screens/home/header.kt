@@ -27,12 +27,13 @@ fun HeaderSection(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp)
+            .height(220.dp)
             .background(
                 BrownDark,
                 shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
             )
-    ) {
+    )
+    {
         Column(
             modifier = Modifier
                 .statusBarsPadding() // ✅ Corregido para evitar que tape el status bar
@@ -47,7 +48,7 @@ fun HeaderSection(navController: NavController) {
 
                 Column {
                     Text(
-                        text = "WELCOME CHEF",
+                        text = "Welcome Chef!",
                         color = Color.White,
                         fontSize = 28.sp,
                         fontWeight = FontWeight.ExtraBold
@@ -97,7 +98,7 @@ fun HeaderSection(navController: NavController) {
                     imageVector = Icons.Default.Search,
                     contentDescription = "Ícono de búsqueda",
                     tint = Color.Gray,
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier.padding(start = 10.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(

@@ -40,4 +40,9 @@ interface TheMealDbApi {
     // Metodo para obtener todos los ingredientes
     @GET("list.php?i=list")
     fun getIngredients(): Call<IngredientResponse>
+
+    // Metodo para obtener una receta por su ID
+    @GET("lookup.php")
+    fun getMealById(@Query("i") id: String): Call<MealResponse>
+
 }

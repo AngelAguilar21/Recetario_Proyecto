@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewModel()) {
     val meals = viewModel.meals.value
-    val shuffledMeals = meals.shuffled()
+    val shuffledMeals = viewModel.shuffledMeals.value
     val featuredMeals = shuffledMeals.take(10)
     val otherMeals = shuffledMeals.drop(5).take(13)
 
@@ -37,7 +37,8 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
-            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(), bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
