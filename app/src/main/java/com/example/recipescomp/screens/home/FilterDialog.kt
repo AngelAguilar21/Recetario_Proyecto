@@ -39,7 +39,7 @@ fun FilterDialog(
         shape = RoundedCornerShape(16.dp),
         title = {
             Text(
-                "FILTROS DE RECETAS",
+                "Recipe Filters",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
                 color = BrownDark
@@ -52,19 +52,19 @@ fun FilterDialog(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     FilterTab(
-                        text = "Categoría",
+                        text = "Category",
                         isSelected = selectedFilterType == "category",
                         onClick = { selectedFilterType = "category" },
                         brownDark = BrownDark
                     )
                     FilterTab(
-                        text = "País",
+                        text = "Country",
                         isSelected = selectedFilterType == "area",
                         onClick = { selectedFilterType = "area" },
                         brownDark = BrownDark
                     )
                     FilterTab(
-                        text = "Ingrediente",
+                        text = "Ingredients",
                         isSelected = selectedFilterType == "ingredient",
                         onClick = { selectedFilterType = "ingredient" },
                         brownDark = BrownDark
@@ -87,7 +87,7 @@ fun FilterDialog(
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            Text("Cargando categorías...", fontSize = 12.sp, color = Color.Gray)
+                                            Text("Loading categories...", fontSize = 12.sp, color = Color.Gray)
                                         }
                                     }
                                 }
@@ -113,7 +113,7 @@ fun FilterDialog(
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            Text("Cargando países...", fontSize = 12.sp, color = Color.Gray)
+                                            Text("Loading countries...", fontSize = 12.sp, color = Color.Gray)
                                         }
                                     }
                                 }
@@ -139,7 +139,7 @@ fun FilterDialog(
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                             CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            Text("Cargando ingredientes...", fontSize = 12.sp, color = Color.Gray)
+                                            Text("Loading ingredients...", fontSize = 12.sp, color = Color.Gray)
                                         }
                                     }
                                 }
@@ -172,7 +172,7 @@ fun FilterDialog(
                 shape = RoundedCornerShape(12.dp),
                 enabled = selectedCategory.isNotEmpty() || selectedArea.isNotEmpty() || selectedIngredient.isNotEmpty()
             ) {
-                Text("Aplicar Filtro")
+                Text("Apply Filter")
             }
         },
         dismissButton = {
@@ -186,7 +186,7 @@ fun FilterDialog(
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = BrownDark),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Limpiar")
+                    Text("Clean")
                 }
                 OutlinedButton(
                     onClick = onDismiss,
@@ -194,7 +194,7 @@ fun FilterDialog(
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = BrownDark),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Cancelar")
+                    Text("Cancel")
                 }
             }
         }

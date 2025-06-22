@@ -21,8 +21,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
+import com.example.recipescomp.data.repository.RecipeModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +38,13 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
     val shuffledMeals = viewModel.shuffledMeals.value
     val featuredMeals = shuffledMeals.take(10)
     val otherMeals = shuffledMeals.drop(5).take(13)
+
+    val context = LocalContext.current
+    val db = AppDatabase.getInstance(context)
+    val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+
+    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+
 
     Box(
         modifier = Modifier
@@ -54,7 +67,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
             }
             item{
                 Text(
-                    "Otras recetas",
+                    "Other Recipes",
                     fontSize = 20.sp,
                     modifier = Modifier.padding(start = 16.dp),
                     color = BrownDark,
@@ -76,8 +89,13 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
                 }
             } else {
                 items(otherMeals) { meal ->
-                    OtherRecipeSection(meal = meal, navController = navController)
+                    OtherRecipeSection(
+                        meal = meal,
+                        navController = navController,
+                        viewModel = viewModel
+                    )
                 }
+
             }
         }
 

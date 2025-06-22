@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
@@ -22,13 +23,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import androidx.navigation.NavController
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.local.FavoriteRecipesEntity
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
+import com.example.recipescomp.resourcesApi.Meal
 import com.example.recipescomp.resourcesApi.MealViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -42,6 +51,15 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
     val meals = viewModel.meals.value
     val isLoading = viewModel.isLoading.value
     val showFilterDialog = remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val db = AppDatabase.getInstance(context)
+    val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+
+    val FavviewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val favorites by FavviewModel.favorites.collectAsState()
+
+
 
     Column(
         modifier = Modifier
@@ -80,7 +98,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
             OutlinedTextField(
                 value = searchQuery.value,
                 onValueChange = { searchQuery.value = it },
-                placeholder = { Text("Buscar recetas...", color = BrownDark, fontSize = 15.sp) },
+                placeholder = { Text("Search Recipes...", color = BrownDark, fontSize = 15.sp) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp) // Ajusta aquí la altura como prefieras
@@ -159,19 +177,19 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
 
 
         // 🌿 Chips de filtros rápidos
-        val selectedChip = remember { mutableStateOf("Todo") }
+        val selectedChip = remember { mutableStateOf("All Recipes") }
 
         LazyRow(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp)
         ) {
-            items(listOf("Todo", "Aleatorio")) { label ->
+            items(listOf("All Recipes", "Random")) { label ->
                 val isSelected = selectedChip.value == label
                 FilterChip(
                     selected = isSelected,
                     onClick = {
                         selectedChip.value = label
-                        if (label == "Todo") viewModel.fetchMeals()
-                        if (label == "Aleatorio") viewModel.getRandomMeals(3)
+                        if (label == "All Recipes") viewModel.fetchMeals()
+                        if (label == "Random") viewModel.getRandomMeals(3)
                     },
                     label = {
                         Text(
@@ -193,7 +211,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
         // 📝 Texto de recetas encontradas
         if (!isLoading && meals.isNotEmpty()) {
             Text(
-                text = "Encontradas ${meals.size} recetas",
+                text = "Founded ${meals.size} recipes...",
                 fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
@@ -210,6 +228,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(meals) { meal ->
+                        val isFavorite = favorites.any { it.name == meal.strMeal }
                         Card(
                             shape = RoundedCornerShape(16.dp),
                             modifier = Modifier
@@ -241,8 +260,22 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                                         Text(meal.strMeal, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1)
                                         Text("${meal.strCategory} • ${meal.strArea}", fontSize = 12.sp, color = Color.Gray)
                                     }
-                                    IconButton(onClick = { /* TODO: marcar favorito */ }) {
-                                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorito")
+                                    IconButton(onClick = {
+                                        if (isFavorite) FavviewModel.deleteFavorite(meal.strMeal)
+                                        else FavviewModel.insertFavorite(
+                                            FavoriteRecipesEntity(
+                                                mealId = meal.idMeal,
+                                                name = meal.strMeal,
+                                                imageUrl = meal.strMealThumb
+                                            )
+                                        )
+
+                                    }) {
+                                        Icon(
+                                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                            contentDescription = "Favorito",
+                                            tint = if (isFavorite) Color.Red else Color.Gray
+                                        )
                                     }
                                 }
                             }

@@ -40,6 +40,8 @@ fun ReusableButton(
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 15.dp)
+            .width(200.dp) // ancho personalizado
+            .height(55.dp) // alto personalizado
     ) {
         Text(text = text, color = Color.White)
     }

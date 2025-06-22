@@ -5,13 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [FavoriteRecipesEntity::class], version = 3)
-abstract class AppDatabase: RoomDatabase(){
+@Database(
+    entities = [FavoriteRecipesEntity::class, ShoppingItemEntity::class],
+    version = 3
+)
+abstract class AppDatabase : RoomDatabase() {
     abstract fun FavoriteRecipesDao(): FavoriteRecipesDao
+    abstract fun ShoppingListDao(): ShoppingListDao
 
-    companion object{
+    companion object {
         @Volatile
-        private var INSTANCE : AppDatabase?=null
+        private var INSTANCE: AppDatabase? = null
 
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -20,11 +24,10 @@ abstract class AppDatabase: RoomDatabase(){
                     AppDatabase::class.java,
                     "recipe_database"
                 )
-                    .fallbackToDestructiveMigration() // 🧨 agrega esta línea
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { INSTANCE = it }
             }
         }
-
     }
 }

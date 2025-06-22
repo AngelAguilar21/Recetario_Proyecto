@@ -11,6 +11,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Button
@@ -201,24 +202,33 @@ fun Modo_Cocina(
                 )
 
 
-                // Parte superior: Paso actual animado
-                AnimatedContent(
-                    targetState = pasos[page],
-                    transitionSpec = {
-                        slideInHorizontally { it } + fadeIn() with
-                                slideOutHorizontally { -it } + fadeOut()
-                    },
-                    label = "PasoAnimado"
-                ) { paso ->
-                    Text(
-                        text = paso,
-                        fontSize = 18.sp,
-                        color = BrownDark,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    )
+                // 📄 Paso como LazyColumn (solo el texto puede hacer scroll)
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        AnimatedContent(
+                            targetState = pasos[page],
+                            transitionSpec = {
+                                slideInHorizontally { it } + fadeIn() with
+                                        slideOutHorizontally { -it } + fadeOut()
+                            },
+                            label = "PasoAnimado"
+                        ) { paso ->
+                            Text(
+                                text = paso,
+                                fontSize = 18.sp,
+                                color = BrownDark,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            )
+                        }
+                    }
                 }
 
                 // Parte inferior fija: Bolitas + Botones

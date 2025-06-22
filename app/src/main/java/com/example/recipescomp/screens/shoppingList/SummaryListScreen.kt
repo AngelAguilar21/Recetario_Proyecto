@@ -3,15 +3,19 @@ package com.example.recipescomp.screens.shoppingList
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
@@ -20,6 +24,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.ui.theme.BrownDark
 import kotlinx.coroutines.launch
@@ -79,7 +84,7 @@ fun SummaryListScreen(navController: NavController) {
 
         var y = 25
         paint.textSize = 12f
-        canvas.drawText("Lista de Ingredientes", 10f, y.toFloat(), paint)
+        canvas.drawText("List of Ingredients", 10f, y.toFloat(), paint)
         y += 20
 
         ingredientes.forEachIndexed { index, ingrediente ->
@@ -91,15 +96,15 @@ fun SummaryListScreen(navController: NavController) {
         pdfDocument.finishPage(page)
 
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "Lista_Ingredientes_$timeStamp.pdf"
+        val fileName = "List_Ingredients_$timeStamp.pdf"
         val directory = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
         val file = File(directory, fileName)
 
         try {
             pdfDocument.writeTo(FileOutputStream(file))
-            Toast.makeText(context, "PDF guardado en: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "PDF saved in: ${file.absolutePath}", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
-            Toast.makeText(context, "Error al guardar PDF", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Error saving PDF", Toast.LENGTH_LONG).show()
         } finally {
             pdfDocument.close()
         }
@@ -108,7 +113,7 @@ fun SummaryListScreen(navController: NavController) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Compartir", color = BrownDark) },
+            title = { Text("Share", color = BrownDark) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
@@ -118,13 +123,13 @@ fun SummaryListScreen(navController: NavController) {
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
                     ) {
-                        Text("Descargar", color = Color.White)
+                        Text("Download", color = Color.White)
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Cancelar", color = BrownDark)
+                    Text("Cancel", color = BrownDark)
                 }
             }
         )
@@ -133,7 +138,7 @@ fun SummaryListScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lista de Ingredientes", color = Color.White) },
+                title = { Text("List of Ingredients", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
@@ -150,7 +155,7 @@ fun SummaryListScreen(navController: NavController) {
                 .fillMaxSize()
         ) {
             Text(
-                text = "Lista:",
+                text = "List:",
                 fontSize = 20.sp,
                 color = BrownDark,
                 style = MaterialTheme.typography.titleMedium
@@ -188,13 +193,14 @@ fun SummaryListScreen(navController: NavController) {
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
                         ) {
-                            Text("Compartir", color = Color.White)
+                            Text("Share", color = Color.White)
                         }
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
+
     }
 }
 

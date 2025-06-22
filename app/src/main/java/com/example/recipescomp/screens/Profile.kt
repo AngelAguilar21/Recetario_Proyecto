@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -133,14 +134,18 @@ fun Perfil(navController: NavController) {
             }
         }
 
+        // 🔽 BARRA DE NAVEGACIÓN INFERIOR
         BottomNavigationBar(
             navController = navController,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .padding(bottom = 12.dp)
+                .padding(horizontal = 32.dp)
+                .clip(RoundedCornerShape(50))
                 .background(BrownDark)
-                .padding(vertical = 16.dp)
+                .shadow(10.dp, RoundedCornerShape(50))
+                .fillMaxWidth()
+                .height(64.dp)
         )
     }
 

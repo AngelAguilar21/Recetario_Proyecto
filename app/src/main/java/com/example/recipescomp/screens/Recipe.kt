@@ -1,8 +1,11 @@
 package com.example.recipescomp.screens
 
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +16,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -32,15 +40,17 @@ import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.components.ReusableButton
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.FavoriteRecipesEntity
+import com.example.recipescomp.data.local.ShoppingItemEntity
 import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
+import kotlinx.coroutines.launch
 
 @Composable
 fun Receta(navController: NavController, meal: Meal) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("INGREDIENTES", "PASO A PASO")
+    val tabs = listOf("Ingredients", "Step to Step")
 
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
@@ -49,7 +59,6 @@ fun Receta(navController: NavController, meal: Meal) {
     val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
-
 
     // ✅ Armar lista de ingredientes válidos
     val ingredientes = remember(meal) {
@@ -93,7 +102,7 @@ fun Receta(navController: NavController, meal: Meal) {
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Atrás",
+                    contentDescription = "Back",
                     tint = BrownDark
                 )
             }
@@ -127,16 +136,16 @@ fun Receta(navController: NavController, meal: Meal) {
                     Spacer(modifier = Modifier.height(6.dp))
 
                     meal.strCategory?.let {
-                        Text("Categoría: $it", style = MaterialTheme.typography.bodySmall)
+                        Text("Category: $it", style = MaterialTheme.typography.bodySmall)
                     }
 
                     meal.strArea?.let {
-                        Text("Región: $it", style = MaterialTheme.typography.bodySmall)
+                        Text("Country: $it", style = MaterialTheme.typography.bodySmall)
                     }
 
                     // 🧮 CANTIDAD DE INGREDIENTES
                     Text(
-                        text = "Ingredientes: ${ingredientes.size}",
+                        text = "Ingredients: ${ingredientes.size}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -168,7 +177,13 @@ fun Receta(navController: NavController, meal: Meal) {
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = Color.Transparent,
-                contentColor = BrownDark
+                contentColor = BrownDark,
+                indicator = { tabPositions ->
+                    TabRowDefaults.Indicator(
+                        Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                        color = BrownDark // ← Color de la línea seleccionada
+                    )
+                }
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
@@ -239,12 +254,96 @@ fun Receta(navController: NavController, meal: Meal) {
                 }
             }
 
-            // 🍳 BOTÓN MODO COCINA
-            ReusableButton(
-                "Modo Cocina",
-                onClick = { navController.navigate("modoCocina") },
-                modifier = Modifier.padding(horizontal = 30.dp)
-            )
+            // 🔲 Fila con el botón "Modo Cocina" y el FAB de los tres puntos
+            // 📦 Estados necesarios
+            val expanded = remember { mutableStateOf(false) }
+            val isInShoppingList = remember { mutableStateOf(false) }
+            val scope = rememberCoroutineScope()
+
+            // 📦 CONTENEDOR para controlar la posición
+            // 🔲 Fila con el botón "Modo Cocina" y el FAB de los tres puntos
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 🍳 Botón Modo Cocina
+                ReusableButton(
+                    "Modo Cocina",
+                    onClick = {
+                        navController.navigate("modoCocina/${meal.idMeal}")
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Contenedor para el botón flotante + menú
+                Box {
+                    // ⋮ Botón flotante
+                    FloatingActionButton(
+                        onClick = { expanded.value = true },
+                        containerColor = BrownDark,
+                        contentColor = Color.White,
+                        shape = CircleShape,
+                        modifier = Modifier.size(55.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Más opciones"
+                        )
+                    }
+
+                    // Menú desplegable hacia ARRIBA y sin borde morado
+                    DropdownMenu(
+                        expanded = expanded.value,
+                        onDismissRequest = { expanded.value = false },
+                        offset = DpOffset(x = 0.dp, y = (-100).dp), // hacia arriba
+                        modifier = Modifier
+                            .background(Color(0xFFFFF8DC)) // amarillo claro sin bordes morados
+                            .border(0.dp, Color.Transparent) // sin borde
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Ver video") },
+                            onClick = {
+                                expanded.value = false
+                                meal.strYoutube?.let {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                                    context.startActivity(intent)
+                                }
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.PlayArrow, contentDescription = null)
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Agregar a lista") },
+                            onClick = {
+                                expanded.value = false
+                                isInShoppingList.value = true
+
+                                val ingredientesStr = ingredientes.joinToString(", ") { "${it.first} (${it.second})" }
+                                val item = ShoppingItemEntity(
+                                    mealId = meal.idMeal ?: "",
+                                    name = meal.strMeal,
+                                    imageUrl = meal.strMealThumb ?: "",
+                                    ingredients = ingredientesStr
+                                )
+                                scope.launch {
+                                    val db = AppDatabase.getInstance(context)
+                                    db.ShoppingListDao().insertItem(item)
+                                }
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.ShoppingCart, contentDescription = null)
+                            }
+                        )
+                    }
+                }
+            }
         }
 
         // 🔽 BARRA DE NAVEGACIÓN INFERIOR
