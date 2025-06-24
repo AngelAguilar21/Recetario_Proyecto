@@ -1,10 +1,8 @@
 package com.example.recipescomp.screens
 import androidx.compose.foundation.lazy.items
 import com.example.recipescomp.resourcesApi.Meal
-
 import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.components.BottomNavigationBar
-import com.example.recipescomp.components.RecipeCardFav
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +10,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,7 +35,6 @@ import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.screens.home.OtherRecipeSection
-
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
@@ -59,7 +57,7 @@ fun ListFavRec(navController: NavController) {
             BackButton(onClick = { navController.popBackStack() })
 
             Text(
-                text=" Recetas Favoritas",
+                text="Favorites Recipes",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
                 color = BrownDark,
@@ -119,14 +117,18 @@ fun ListFavRec(navController: NavController) {
 
         }
 
+        // 🔽 BARRA DE NAVEGACIÓN INFERIOR
         BottomNavigationBar(
             navController = navController,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .padding(bottom = 12.dp)
+                .padding(horizontal = 32.dp)
+                .clip(RoundedCornerShape(50))
                 .background(BrownDark)
-                .padding(vertical = 16.dp)
+                .shadow(10.dp, RoundedCornerShape(50))
+                .fillMaxWidth()
+                .height(64.dp)
         )
     }
 }

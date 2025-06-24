@@ -1,11 +1,5 @@
 package com.example.recipescomp.screens.home
 
-import androidx.compose.ui.platform.LocalContext
-import com.example.recipescomp.data.local.AppDatabase
-import com.example.recipescomp.data.repository.FavoriteRecipeRepository
-import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
-import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
@@ -27,29 +21,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
+import com.example.recipescomp.data.repository.RecipeModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewModel()) {
     val meals = viewModel.meals.value
-    val shuffledMeals = meals.shuffled()
+    val shuffledMeals = viewModel.shuffledMeals.value
     val featuredMeals = shuffledMeals.take(10)
     val otherMeals = shuffledMeals.drop(5).take(13)
 
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
-    val favoriteRepository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
-    val favoriteViewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(favoriteRepository))
+    val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+
+    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
 
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
-            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(), bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
@@ -65,7 +67,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
             }
             item{
                 Text(
-                    "Otras recetas",
+                    "Other Recipes",
                     fontSize = 20.sp,
                     modifier = Modifier.padding(start = 16.dp),
                     color = BrownDark,
@@ -90,7 +92,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
                     OtherRecipeSection(
                         meal = meal,
                         navController = navController,
-                        viewModel = favoriteViewModel
+                        viewModel = viewModel
                     )
                 }
 

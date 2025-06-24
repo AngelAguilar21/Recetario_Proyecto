@@ -25,22 +25,45 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.FavoriteRecipesEntity
-import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.resourcesApi.Meal
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
+
 @Composable
 fun OtherRecipeSection(
     meal: Meal,
     navController: NavController,
-    viewModel: FavoriteRecipeViewModel
-) {
+    viewModel: FavoriteRecipeViewModel // Agregado aquí
+){
+    val context = LocalContext.current
+    val db = AppDatabase.getInstance(context)
+    val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+
+    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
     val favorites by viewModel.favorites.collectAsState()
-    val isFav = favorites.any { it.mealId == meal.idMeal }
+    val isFavorite = favorites.any { it.name == meal.strMeal }
+
+    if (meal == null) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        return
+    }
 
     Row(
         modifier = Modifier
@@ -68,43 +91,54 @@ fun OtherRecipeSection(
         Column(modifier = Modifier.weight(1f)) {
             Text(text = meal.strMeal, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Text(
-                text = "Categoría: ${meal.strCategory ?: "Desconocida"}",
+                text = "Categoríes: ${meal.strCategory ?: "Unknown"}",
                 fontSize = 13.sp,
                 color = Color.Gray
             )
 
-            // Puedes mejorar este contador si tienes los ingredientes reales
             val ingredientCount = listOf(
-                meal.strIngredient1, meal.strIngredient2, meal.strIngredient3
+                meal.strIngredient1,
+                meal.strIngredient2,
+                meal.strIngredient3,
+                meal.strIngredient4,
+                meal.strIngredient5,
+                meal.strIngredient6,
+                meal.strIngredient7,
+                meal.strIngredient8,
+                meal.strIngredient9,
+                meal.strIngredient10
             ).count { !it.isNullOrBlank() }
 
             Text(
-                text = "Ingredientes: $ingredientCount",
+                text = "Ingredients: $ingredientCount",
                 fontSize = 13.sp,
                 color = Color.Gray
             )
         }
 
-        IconButton(
-            onClick = {
-                if (isFav) viewModel.deleteFavorite(meal.strMeal)
-                else viewModel.insertFavorite(
-                    FavoriteRecipesEntity(
-                        mealId = meal.idMeal,
-                        name = meal.strMeal,
-                        imageUrl = meal.strMealThumb
-                    )
+
+        //Boton de favoritos
+        IconButton(onClick = {
+            if (isFavorite) viewModel.deleteFavorite(meal.strMeal)
+            else viewModel.insertFavorite(
+                FavoriteRecipesEntity(
+                    mealId = meal.idMeal,
+                    name = meal.strMeal,
+                    imageUrl = meal.strMealThumb
                 )
-            },
-            modifier = Modifier.align(Alignment.Bottom)
-        ) {
+            )
+
+        }) {
             Icon(
-                imageVector = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = "Favorito",
-                tint = if (isFav) Color.Red else Color.Gray
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorite",
+                tint = if (isFavorite) Color.Red else Color.Gray
             )
         }
     }
+
+
 }
+
 
 

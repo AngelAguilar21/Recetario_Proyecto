@@ -12,3 +12,4 @@ data class FavoriteRecipesEntity(
     val category: String? = null,
     val ingredientCount: Int = 0
 )
+

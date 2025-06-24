@@ -13,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -22,7 +24,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.ShoppingItemEntity
-import com.example.recipescomp.data.local.ShoppingListDao
 import com.example.recipescomp.ui.theme.BrownDark
 import kotlinx.coroutines.launch
 
@@ -49,7 +50,7 @@ fun Lista_Compras(navController: NavController) {
         topBar = {
             // 🧭 Barra superior con botón de regreso
             TopAppBar(
-                title = { Text("Lista de Compras", color = Color.White) },
+                title = { Text("Shopping list", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
@@ -59,8 +60,18 @@ fun Lista_Compras(navController: NavController) {
             )
         },
         bottomBar = {
-            // ⬇️ Barra inferior de navegación
-            BottomNavigationBar(navController = navController)
+            // 🔽 BARRA DE NAVEGACIÓN INFERIOR
+            BottomNavigationBar(
+                navController = navController,
+                modifier = Modifier
+                    .padding(bottom = 12.dp)
+                    .padding(horizontal = 32.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(BrownDark)
+                    .shadow(10.dp, RoundedCornerShape(50))
+                    .fillMaxWidth()
+                    .height(64.dp)
+            )
         }
     ) { padding ->
         if (items.isEmpty()) {
@@ -71,7 +82,7 @@ fun Lista_Compras(navController: NavController) {
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No has agregado recetas aún.", color = Color.Gray)
+                Text("You haven't added any recipes yet.", color = Color.Gray)
             }
         } else {
             Column(
@@ -81,7 +92,7 @@ fun Lista_Compras(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Recetas Seleccionadas",
+                    text = "Selected Recipes",
                     fontSize = 20.sp,
                     modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp),
                     color = BrownDark
@@ -148,10 +159,13 @@ fun Lista_Compras(navController: NavController) {
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
                 ) {
-                    Text("Generar Lista", fontSize = 16.sp, color = Color.White)
+                    Text("Generate List", fontSize = 16.sp, color = Color.White)
                 }
             }
         }
+
+
+
     }
 }
 

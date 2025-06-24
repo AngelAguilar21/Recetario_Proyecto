@@ -28,7 +28,7 @@ fun CategoriesSection(navController: NavController) {
 
     // Título de categorías
     Text(
-        text = "Categorías",
+        text = "Categories",
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold,
         color = BrownDark,
