@@ -1,11 +1,16 @@
 package com.example.recipescomp.screens
+
 import androidx.compose.foundation.lazy.items
 import com.example.recipescomp.resourcesApi.Meal
 import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.components.BottomNavigationBar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -46,27 +52,43 @@ fun ListFavRec(navController: NavController) {
     val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
     val recipes by viewModel.favorites.collectAsState()
 
-
-    Box(modifier = Modifier.fillMaxSize().padding(top = 10.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = 40.dp,
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            )
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 16.dp, bottom = 70.dp)
-            .statusBarsPadding()
+                .padding(PaddingValues(start = 16.dp, end = 16.dp, bottom = 70.dp))
         ) {
-            BackButton(onClick = { navController.popBackStack() })
-
-            Text(
-                text="Favorites Recipes",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = BrownDark,
+            Row(
                 modifier = Modifier
-                    .padding(bottom = 20.dp, top = 10.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    BackButton(onClick = { navController.popBackStack() })
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "Recetas Favoritas",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp
+                    )
+                }
+            }
 
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 items(recipes) { fav ->
                     val fakeMeal = Meal(
                         idMeal = fav.mealId,
@@ -100,10 +122,14 @@ fun ListFavRec(navController: NavController) {
                         strIngredient20 = null, strMeasure20 = null
                     ).apply {
                         // 🔄 Rellenamos dinámicamente los ingredientes simulados
-                        for (i in 1..fav.ingredientCount.coerceAtMost(20)) {
-                            val field = this::class.java.getDeclaredField("strIngredient$i")
-                            field.isAccessible = true
-                            field.set(this, "•") // lo que sea, solo para que no sea null/blank
+                        try {
+                            for (i in 1..fav.ingredientCount.coerceAtMost(20)) {
+                                val field = this::class.java.getDeclaredField("strIngredient$i")
+                                field.isAccessible = true
+                                field.set(this, "Ingrediente $i") // Valor más descriptivo
+                            }
+                        } catch (e: Exception) {
+                            // Manejo de errores en caso de que falle la reflexión
                         }
                     }
 
@@ -114,7 +140,6 @@ fun ListFavRec(navController: NavController) {
                     )
                 }
             }
-
         }
 
         // 🔽 BARRA DE NAVEGACIÓN INFERIOR

@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,17 +16,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.ShoppingItemEntity
 import com.example.recipescomp.ui.theme.BrownDark
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Lista_Compras(navController: NavController) {
     val context = LocalContext.current
@@ -46,70 +46,81 @@ fun Lista_Compras(navController: NavController) {
         cargarDesdeRoom()
     }
 
-    Scaffold(
-        topBar = {
-            // 🧭 Barra superior con botón de regreso
-            TopAppBar(
-                title = { Text("Shopping list", color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BrownDark)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                top = 40.dp,
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             )
-        },
-        bottomBar = {
-            // 🔽 BARRA DE NAVEGACIÓN INFERIOR
-            BottomNavigationBar(
-                navController = navController,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(PaddingValues(start = 16.dp, end = 16.dp, bottom = 70.dp))
+        ) {
+            // 🧭 Barra superior con botón de regreso y título
+            Row(
                 modifier = Modifier
-                    .padding(bottom = 12.dp)
-                    .padding(horizontal = 32.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(BrownDark)
-                    .shadow(10.dp, RoundedCornerShape(50))
                     .fillMaxWidth()
-                    .height(64.dp)
-            )
-        }
-    ) { padding ->
-        if (items.isEmpty()) {
-            // 📭 Mensaje si no hay recetas guardadas
-            Box(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("You haven't added any recipes yet.", color = Color.Gray)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    BackButton(onClick = { navController.popBackStack() })
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "Lista de Compras",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp
+                    )
+                }
             }
-        } else {
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (items.isEmpty()) {
+                // 📭 Mensaje si no hay recetas guardadas
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Aún no has agregado ninguna receta.",
+                        color = Color.Gray,
+                        fontSize = 16.sp
+                    )
+                }
+            } else {
+                // Título de la sección
                 Text(
-                    text = "Selected Recipes",
+                    text = "Recetas Seleccionadas",
                     fontSize = 20.sp,
-                    modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp),
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 16.dp),
                     color = BrownDark
                 )
 
-                // 📝 Lista de recetas guardadas con imagen y botón eliminar
-                LazyColumn(modifier = Modifier.padding(horizontal = 16.dp).weight(1f)) {
+                // 📝 Lista de recetas guardadas
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.8f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     items(items) { item ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 8.dp),
+                                .shadow(4.dp, RoundedCornerShape(16.dp)),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F2E7))
                         ) {
                             Row(
-                                modifier = Modifier.padding(12.dp),
+                                modifier = Modifier.padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 // 🍽 Imagen de la receta
@@ -117,16 +128,28 @@ fun Lista_Compras(navController: NavController) {
                                     painter = rememberAsyncImagePainter(item.imageUrl),
                                     contentDescription = null,
                                     modifier = Modifier
-                                        .size(90.dp)
-                                        .background(Color.LightGray, RoundedCornerShape(12.dp))
+                                        .size(80.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color.LightGray)
                                 )
 
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(16.dp))
 
                                 // 📝 Nombre e ingredientes
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = item.name, fontSize = 18.sp, color = BrownDark)
-                                    Text(text = item.ingredients, fontSize = 14.sp, color = Color.DarkGray)
+                                    Text(
+                                        text = item.name,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = BrownDark
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = item.ingredients,
+                                        fontSize = 14.sp,
+                                        color = Color.DarkGray,
+                                        maxLines = 2
+                                    )
                                 }
 
                                 // 🗑 Botón de eliminar receta
@@ -135,7 +158,7 @@ fun Lista_Compras(navController: NavController) {
                                         scope.launch {
                                             val db = AppDatabase.getInstance(context)
                                             db.ShoppingListDao().deleteItem(item)
-                                            cargarDesdeRoom() // recargar lista
+                                            cargarDesdeRoom()
                                         }
                                     }
                                 ) {
@@ -150,22 +173,41 @@ fun Lista_Compras(navController: NavController) {
                     }
                 }
 
-                // 🧾 Botón "Generar Lista" al fondo
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 🧾 Botón "Generar Lista"
                 Button(
                     onClick = { navController.navigate("summary_list") },
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(0.6f)
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .height(56.dp)
+                        .shadow(8.dp, RoundedCornerShape(16.dp)),
+                    colors = ButtonDefaults.buttonColors(containerColor = BrownDark),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Generate List", fontSize = 16.sp, color = Color.White)
+                    Text(
+                        "Generar Lista",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
                 }
             }
         }
 
-
-
+        // 🔽 BARRA DE NAVEGACIÓN INFERIOR
+        BottomNavigationBar(
+            navController = navController,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp)
+                .padding(horizontal = 32.dp)
+                .clip(RoundedCornerShape(50))
+                .background(BrownDark)
+                .shadow(10.dp, RoundedCornerShape(50))
+                .fillMaxWidth()
+                .height(64.dp)
+        )
     }
 }
-

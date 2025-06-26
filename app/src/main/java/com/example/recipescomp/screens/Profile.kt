@@ -11,11 +11,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +35,10 @@ import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
+import com.example.recipescomp.data.Firebase.FirebaseAuthManager
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun Perfil(navController: NavController) {
@@ -44,6 +47,33 @@ fun Perfil(navController: NavController) {
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
     val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
     val favorites by viewModel.favorites.collectAsState()
+
+    // Firebase Auth y Firestore
+    val currentUser = FirebaseAuthManager.getCurrentUser()
+    val firestore = FirebaseFirestore.getInstance()
+
+    // Estados para el usuario
+    var userName by remember { mutableStateOf("Usuario") }
+    var userEmail by remember { mutableStateOf("") }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    // Obtener datos del usuario desde Firestore
+    LaunchedEffect(currentUser) {
+        currentUser?.let { user ->
+            userEmail = user.email ?: ""
+            try {
+                val userDoc = firestore.collection("users").document(user.uid).get().await()
+                if (userDoc.exists()) {
+                    userName = userDoc.getString("name") ?: user.email?.substringBefore("@") ?: "Usuario"
+                } else {
+                    userName = user.email?.substringBefore("@") ?: "Usuario"
+                }
+            } catch (e: Exception) {
+                userName = user.email?.substringBefore("@") ?: "Usuario"
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -63,15 +93,34 @@ fun Perfil(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                BackButton(onClick = { navController.popBackStack() })
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Perfil",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    BackButton(onClick = { navController.popBackStack() })
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "Perfil",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp
+                    )
+                }
+
+                // Botón de cerrar sesión
+                IconButton(
+                    onClick = { showLogoutDialog = true },
+                    modifier = Modifier
+                        .background(
+                            Color.Red.copy(alpha = 0.1f),
+                            CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = "Cerrar sesión",
+                        tint = Color.Red
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -94,11 +143,20 @@ fun Perfil(navController: NavController) {
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Text(
-                    text = "User name",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
+                Column {
+                    Text(
+                        text = userName,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    if (userEmail.isNotEmpty()) {
+                        Text(
+                            text = userEmail,
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -172,6 +230,49 @@ fun Perfil(navController: NavController) {
                 .shadow(10.dp, RoundedCornerShape(50))
                 .fillMaxWidth()
                 .height(64.dp)
+        )
+    }
+
+    // Diálogo de confirmación para cerrar sesión
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = {
+                Text("Cerrar sesión")
+            },
+            text = {
+                Text("¿Estás seguro de que quieres cerrar sesión?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            try {
+                                FirebaseAuthManager.signOut()
+                                showLogoutDialog = false
+                                // Navegar a la pantalla de login y limpiar el back stack
+                                navController.navigate("Login_Principal") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            } catch (e: Exception) {
+                                showLogoutDialog = false
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.Red
+                    )
+                ) {
+                    Text("Cerrar sesión")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showLogoutDialog = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
         )
     }
 }

@@ -4,8 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
-
-
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -44,7 +43,15 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
+    // Firebase Auth
+    implementation("com.google.firebase:firebase-auth-ktx")
 
+    // Firebase Firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Corrutinas para Firebase
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

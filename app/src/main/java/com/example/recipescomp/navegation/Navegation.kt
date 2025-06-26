@@ -17,11 +17,10 @@ import com.example.recipescomp.screens.Inicio_Login
 import com.example.recipescomp.auth.Registrarse
 import com.example.recipescomp.auth.Login_Principal
 import com.example.recipescomp.screens.*
-import com.example.recipescomp.screens.category.CategoryScreen
 import com.example.recipescomp.screens.home.SearchScreen
 import com.example.recipescomp.resourcesApi.MealViewModel
-import com.example.recipescomp.screens.shoppingList.ListaIngredientes
 import com.example.recipescomp.screens.shoppingList.Lista_Compras
+import com.example.recipescomp.screens.shoppingList.SummaryListScreen
 
 
 @Composable
@@ -76,13 +75,12 @@ fun Navigation(){
             val mealId = backStackEntry.arguments?.getString("mealId") ?: return@composable
             Modo_Cocina(navController, mealId)
         }
-
+        composable("summary_list") {
+            SummaryListScreen(navController = navController)
+        }
 
         composable("search") {
             SearchScreen(navController, mealViewModel)
-        }
-        composable("lista_ingredientes"){
-            ListaIngredientes(navController)
         }
 
     }
