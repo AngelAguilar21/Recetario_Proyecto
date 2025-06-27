@@ -26,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.repository.FavoriteRecipeRepository
-import com.example.recipescomp.data.repository.RecipeModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 
@@ -34,7 +33,6 @@ import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewModel()) {
-    val meals = viewModel.meals.value
     val shuffledMeals = viewModel.shuffledMeals.value
     val featuredMeals = shuffledMeals.take(10)
     val otherMeals = shuffledMeals.drop(5).take(13)
@@ -50,7 +48,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
-            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .padding(top = 40.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
 
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {

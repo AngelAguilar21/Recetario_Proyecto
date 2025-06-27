@@ -34,7 +34,6 @@ import androidx.navigation.NavController
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.FavoriteRecipesEntity
 import com.example.recipescomp.data.repository.FavoriteRecipeRepository
-import com.example.recipescomp.resourcesApi.Meal
 import com.example.recipescomp.resourcesApi.MealViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
@@ -56,8 +55,8 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
     val db = AppDatabase.getInstance(context)
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
 
-    val FavviewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
-    val favorites by FavviewModel.favorites.collectAsState()
+    val favviewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val favorites by favviewModel.favorites.collectAsState()
 
 
 
@@ -261,8 +260,8 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                                         Text("${meal.strCategory} • ${meal.strArea}", fontSize = 12.sp, color = Color.Gray)
                                     }
                                     IconButton(onClick = {
-                                        if (isFavorite) FavviewModel.deleteFavorite(meal.strMeal)
-                                        else FavviewModel.insertFavorite(
+                                        if (isFavorite) favviewModel.deleteFavorite(meal.strMeal)
+                                        else favviewModel.insertFavorite(
                                             FavoriteRecipesEntity(
                                                 mealId = meal.idMeal,
                                                 name = meal.strMeal,

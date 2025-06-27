@@ -117,9 +117,7 @@ fun Registrarse(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            )
+            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     ) {
         Image(
             painter = painterResource(id = R.drawable.fondo_login_2),

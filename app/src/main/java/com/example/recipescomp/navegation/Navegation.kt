@@ -65,9 +65,7 @@ fun Navigation(){
         composable("perfil"){
             Perfil(navController)
         }
-        composable("configuracion"){
-            Configuracion(navController)
-        }
+
         composable(
             "modoCocina/{mealId}",
             arguments = listOf(navArgument("mealId") { type = NavType.StringType })

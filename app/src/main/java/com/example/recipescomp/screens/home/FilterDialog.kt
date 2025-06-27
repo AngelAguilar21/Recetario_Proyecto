@@ -31,11 +31,11 @@ fun FilterDialog(
     val categories = viewModel.categories.value
     val areas = viewModel.areas.value
     val ingredients = viewModel.ingredients.value
-    val FondoTransparente = Color(0xFFF7F2E7).copy(alpha = 0.95f)
+    val fondoTransparente = Color(0xFFF7F2E7).copy(alpha = 0.95f)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = FondoTransparente,
+        containerColor = fondoTransparente,
         shape = RoundedCornerShape(16.dp),
         title = {
             Text(

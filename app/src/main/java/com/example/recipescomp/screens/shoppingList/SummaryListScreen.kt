@@ -16,10 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -32,8 +29,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.max
 
-// 📦 Structured data class for a final grouped ingredient
 data class GroupedIngredient(
     val name: String,
     val unit: String,
@@ -46,75 +43,126 @@ fun SummaryListScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     var finalList by remember { mutableStateOf<List<GroupedIngredient>>(emptyList()) }
     var showDialog by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(true) {
         scope.launch {
-            val db = AppDatabase.getInstance(context)
-            val items = db.ShoppingListDao().getAllItems()
+            try {
+                val db = AppDatabase.getInstance(context)
+                val items = db.ShoppingListDao().getAllItems()
 
-            val grouped = mutableMapOf<Pair<String, String>, Double>()
-            items.flatMap { it.ingredients.split(",") }
-                .mapNotNull { raw ->
-                    val match = Regex("(.+?)\\((\\d+(?:[.,]?\\d*)?)\\s*(\\w+)\\)").find(raw.trim())
-                    match?.let {
-                        val name = it.groupValues[1].trim().lowercase()
-                        val quantity = it.groupValues[2].replace(",", ".").toDoubleOrNull() ?: 0.0
-                        val unit = it.groupValues[3].trim().lowercase()
-                        Triple(name, unit, quantity)
+                val grouped = mutableMapOf<Pair<String, String>, Double>()
+                items.flatMap { it.ingredients.split(",") }
+                    .mapNotNull { raw ->
+                        // Regex mejorado para mejor parsing
+                        val match = Regex("(.+?)\\((\\d+(?:[.,]\\d+)?)\\s*(\\w+)\\)").find(raw.trim())
+                        match?.let {
+                            val name = it.groupValues[1].trim().lowercase()
+                            // Manejo más robusto de números decimales
+                            val quantityStr = it.groupValues[2].replace(",", ".")
+                            val quantity = quantityStr.toDoubleOrNull() ?: 0.0
+                            val unit = it.groupValues[3].trim().lowercase()
+                            Triple(name, unit, quantity)
+                        }
                     }
-                }
-                .forEach { (name, unit, quantity) ->
-                    val key = name to unit
-                    grouped[key] = grouped.getOrDefault(key, 0.0) + quantity
-                }
+                    .forEach { (name, unit, quantity) ->
+                        val key = name to unit
+                        grouped[key] = grouped.getOrDefault(key, 0.0) + quantity
+                    }
 
-            finalList = grouped.map { (key, quantity) ->
-                GroupedIngredient(name = key.first, unit = key.second, quantity = quantity)
+                finalList = grouped.map { (key, quantity) ->
+                    GroupedIngredient(name = key.first, unit = key.second, quantity = quantity)
+                }.sortedBy { it.name }
+
+                isLoading = false
+            } catch (e: Exception) {
+                errorMessage = "Error loading ingredients: ${e.message}"
+                isLoading = false
             }
         }
     }
 
     fun exportToPDF(ingredients: List<GroupedIngredient>) {
-        val pdfDocument = PdfDocument()
-        val pageInfo = PdfDocument.PageInfo.Builder(300, 600, 1).create()
-        val page = pdfDocument.startPage(pageInfo)
-        val canvas = page.canvas
-        val paint = android.graphics.Paint()
-
-        var y = 25
-        paint.textSize = 12f
-        canvas.drawText("Ingredients List", 10f, y.toFloat(), paint)
-        y += 20
-
-        ingredients.forEachIndexed { index, ingredient ->
-            val line = "${index + 1}. ${ingredient.quantity} ${ingredient.unit} ${ingredient.name.capitalize()}"
-            canvas.drawText(line, 10f, y.toFloat(), paint)
-            y += 18
-        }
-
-        pdfDocument.finishPage(page)
-
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "Ingredients_List_$timeStamp.pdf"
-        val directory = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-        val file = File(directory, fileName)
-
         try {
+            val pdfDocument = PdfDocument()
+
+            // Calcular altura dinámica basada en número de ingredientes
+            val baseHeight = 100
+            val itemHeight = 25
+            val totalHeight = max(600, baseHeight + (ingredients.size * itemHeight))
+
+            val pageInfo = PdfDocument.PageInfo.Builder(400, totalHeight, 1).create()
+            val page = pdfDocument.startPage(pageInfo)
+            val canvas = page.canvas
+            val paint = android.graphics.Paint()
+
+            var y = 40
+
+            // Título
+            paint.textSize = 16f
+            paint.isFakeBoldText = true
+            canvas.drawText("Shopping List - Ingredients", 20f, y.toFloat(), paint)
+            y += 30
+
+            // Línea separadora
+            paint.strokeWidth = 2f
+            canvas.drawLine(20f, y.toFloat(), 380f, y.toFloat(), paint)
+            y += 25
+
+            // Lista de ingredientes
+            paint.textSize = 12f
+            paint.isFakeBoldText = false
+
+            ingredients.forEachIndexed { index, ingredient ->
+                val formattedQuantity = if (ingredient.quantity % 1 == 0.0) {
+                    ingredient.quantity.toInt().toString()
+                } else {
+                    String.format("%.2f", ingredient.quantity)
+                }
+
+                val capitalizedName = ingredient.name.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                }
+
+                val line = "${index + 1}. $formattedQuantity ${ingredient.unit} $capitalizedName"
+                canvas.drawText(line, 20f, y.toFloat(), paint)
+                y += 20
+            }
+
+            pdfDocument.finishPage(page)
+
+            // Guardar en directorio interno de la app para evitar problemas de permisos
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val fileName = "Shopping_List_$timeStamp.pdf"
+            val directory = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            val file = File(directory, fileName)
+
             pdfDocument.writeTo(FileOutputStream(file))
-            Toast.makeText(context, "PDF saved at: ${file.absolutePath}", Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            Toast.makeText(context, "Error saving PDF", Toast.LENGTH_LONG).show()
-        } finally {
             pdfDocument.close()
+
+            Toast.makeText(
+                context,
+                "PDF saved successfully!\nLocation: ${file.absolutePath}",
+                Toast.LENGTH_LONG
+            ).show()
+
+        } catch (e: Exception) {
+            Toast.makeText(
+                context,
+                "Error creating PDF: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
+    // Dialog de compartir
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = {
                 Text(
-                    "Share List",
+                    "Share Shopping List",
                     color = BrownDark,
                     fontWeight = FontWeight.Bold
                 )
@@ -173,7 +221,7 @@ fun SummaryListScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(PaddingValues(start = 16.dp, end = 16.dp, bottom = 70.dp))
         ) {
-            // 🧭 Top bar with back button and title
+            // Top bar con botón back y título
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -185,7 +233,7 @@ fun SummaryListScreen(navController: NavController) {
                     BackButton(onClick = { navController.popBackStack() })
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Ingredients List",
+                        text = "Shopping List",
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp
                     )
@@ -194,116 +242,182 @@ fun SummaryListScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (finalList.isEmpty()) {
-                // Message if no ingredients
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "No ingredients to display.",
-                        color = Color.Gray,
-                        fontSize = 16.sp
-                    )
+            when {
+                isLoading -> {
+                    // Indicador de carga
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = BrownDark
+                        )
+                    }
                 }
-            } else {
-                // Section title
-                Text(
-                    text = "Final List:",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    color = BrownDark
-                )
 
-                // Ingredients list
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.8f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    itemsIndexed(finalList) { index, ingredient ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(2.dp, RoundedCornerShape(12.dp)),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F2E7))
+                errorMessage != null -> {
+                    // Mensaje de error
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Text(
+                                errorMessage!!,
+                                color = Color.Red,
+                                fontSize = 16.sp
+                            )
+                            Button(
+                                onClick = {
+                                    errorMessage = null
+                                    isLoading = true
+                                    // Reintentar carga
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
                             ) {
-                                // Ingredient number
-                                Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .background(
-                                            BrownDark,
-                                            RoundedCornerShape(8.dp)
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "${index + 1}",
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                // Ingredient information
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = ingredient.name.replaceFirstChar {
-                                            if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-                                        },
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = BrownDark
-                                    )
-                                    Text(
-                                        text = "${ingredient.quantity} ${ingredient.unit}",
-                                        fontSize = 14.sp,
-                                        color = Color.DarkGray
-                                    )
-                                }
+                                Text("Retry", color = Color.White)
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                finalList.isEmpty() -> {
+                    // Lista vacía
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                "No ingredients found",
+                                color = Color.Gray,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                "Add some recipes to generate your shopping list",
+                                color = Color.Gray,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
 
-                // 📤 Share button with added padding
-                Button(
-                    onClick = { showDialog = true },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                        .height(56.dp)
-                        .shadow(8.dp, RoundedCornerShape(16.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrownDark),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
+                else -> {
+                    // Lista de ingredientes
                     Text(
-                        "Share List",
-                        fontSize = 18.sp,
+                        text = "Final Shopping List (${finalList.size} items):",
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        color = BrownDark
                     )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(0.8f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        itemsIndexed(finalList) { index, ingredient ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(2.dp, RoundedCornerShape(12.dp)),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F2E7))
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Número del ingrediente
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .background(
+                                                BrownDark,
+                                                RoundedCornerShape(8.dp)
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "${index + 1}",
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(16.dp))
+
+                                    // Información del ingrediente
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = ingredient.name.replaceFirstChar {
+                                                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                                            },
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = BrownDark
+                                        )
+
+                                        val formattedQuantity = if (ingredient.quantity % 1 == 0.0) {
+                                            ingredient.quantity.toInt().toString()
+                                        } else {
+                                            String.format("%.2f", ingredient.quantity)
+                                        }
+
+                                        Text(
+                                            text = "$formattedQuantity ${ingredient.unit}",
+                                            fontSize = 14.sp,
+                                            color = Color.DarkGray
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Botón de compartir
+                    Button(
+                        onClick = { showDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .height(56.dp)
+                            .shadow(8.dp, RoundedCornerShape(16.dp)),
+                        colors = ButtonDefaults.buttonColors(containerColor = BrownDark),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            "Share Shopping List",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }
 
-        // 🔽 BOTTOM NAVIGATION BAR
+        // Barra de navegación inferior
         BottomNavigationBar(
             navController = navController,
             modifier = Modifier
@@ -318,3 +432,4 @@ fun SummaryListScreen(navController: NavController) {
         )
     }
 }
+

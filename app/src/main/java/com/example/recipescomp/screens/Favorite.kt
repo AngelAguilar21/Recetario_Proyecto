@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -121,7 +120,6 @@ fun ListFavRec(navController: NavController) {
                         strIngredient19 = null, strMeasure19 = null,
                         strIngredient20 = null, strMeasure20 = null
                     ).apply {
-                        // 🔄 Rellenamos dinámicamente los ingredientes simulados
                         try {
                             for (i in 1..fav.ingredientCount.coerceAtMost(20)) {
                                 val field = this::class.java.getDeclaredField("strIngredient$i")

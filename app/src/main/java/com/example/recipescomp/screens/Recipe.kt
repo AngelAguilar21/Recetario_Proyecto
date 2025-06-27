@@ -60,7 +60,6 @@ fun Receta(navController: NavController, meal: Meal) {
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
 
-    // ✅ Armar lista de ingredientes válidos
     val ingredientes = remember(meal) {
         (1..20).mapNotNull { i ->
             val ingredient = meal.javaClass.getDeclaredField("strIngredient$i").apply { isAccessible = true }.get(meal) as? String

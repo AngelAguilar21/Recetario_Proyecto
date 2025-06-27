@@ -17,8 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +41,7 @@ import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 fun OtherRecipeSection(
     meal: Meal,
     navController: NavController,
-    viewModel: FavoriteRecipeViewModel // Agregado aquí
+    viewModel: FavoriteRecipeViewModel
 ){
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
@@ -90,6 +88,7 @@ fun OtherRecipeSection(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(text = meal.strMeal, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Categoríes: ${meal.strCategory ?: "Unknown"}",
                 fontSize = 13.sp,
@@ -106,9 +105,14 @@ fun OtherRecipeSection(
                 meal.strIngredient7,
                 meal.strIngredient8,
                 meal.strIngredient9,
-                meal.strIngredient10
+                meal.strIngredient10,
+                meal.strIngredient11,
+                meal.strIngredient12,
+                meal.strIngredient13,
+                meal.strIngredient14,
+                meal.strIngredient15
             ).count { !it.isNullOrBlank() }
-
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Ingredients: $ingredientCount",
                 fontSize = 13.sp,

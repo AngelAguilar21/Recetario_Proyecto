@@ -16,12 +16,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.recipescomp.data.category.Category
 import com.example.recipescomp.ui.theme.BrownDark
+
+data class Category(
+    val id: String,
+    val name: String,
+    val iconComposable: ImageVector, // El ícono de la categoría
+    val route: String // Ruta para la navegación
+)
 
 @Composable
 fun CategoriesSection(navController: NavController) {

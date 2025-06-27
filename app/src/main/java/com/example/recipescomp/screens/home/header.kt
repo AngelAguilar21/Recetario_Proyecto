@@ -36,10 +36,9 @@ fun HeaderSection(navController: NavController) {
     {
         Column(
             modifier = Modifier
-                .statusBarsPadding() // ✅ Corregido para evitar que tape el status bar
+                .statusBarsPadding()
                 .padding(16.dp)
         ) {
-            // 👤 Bienvenida + ícono de perfil
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -74,7 +73,7 @@ fun HeaderSection(navController: NavController) {
                         modifier = Modifier
                             .size(50.dp)
                             .clickable {
-                                navController.navigate("User Profile")
+                                navController.navigate("perfil")
                             }
                     )
                 }
