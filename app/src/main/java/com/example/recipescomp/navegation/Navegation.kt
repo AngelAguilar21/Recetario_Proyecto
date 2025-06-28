@@ -7,18 +7,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.recipescomp.screens.home.HomeScreen
 import com.example.recipescomp.screens.Inicio_Login
 import com.example.recipescomp.auth.Registrarse
 import com.example.recipescomp.auth.Login_Principal
 import com.example.recipescomp.screens.*
 import com.example.recipescomp.screens.home.SearchScreen
-import com.example.recipescomp.screens.shoppingList.*
 import com.example.recipescomp.resourcesApi.MealViewModel
-
+import com.example.recipescomp.screens.category.CategoryScreen
+import com.example.recipescomp.screens.shoppingList.Lista_Compras
+import com.example.recipescomp.screens.shoppingList.SummaryListScreen
 
 
 @Composable
@@ -46,10 +49,6 @@ fun Navigation(){
             Lista_Compras(navController)
         }
 
-        composable("summary_list") {
-            SummaryListScreen(navController)
-        }
-
         composable("receta/{mealId}") { backStackEntry ->
             val mealId = backStackEntry.arguments?.getString("mealId") ?: ""
             val meal = mealViewModel.meals.value.find { it.idMeal == mealId }
@@ -67,16 +66,26 @@ fun Navigation(){
         composable("perfil"){
             Perfil(navController)
         }
-        composable("configuracion"){
-            Configuracion(navController)
+
+        composable(
+            "modoCocina/{mealId}",
+            arguments = listOf(navArgument("mealId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val mealId = backStackEntry.arguments?.getString("mealId") ?: return@composable
+            Modo_Cocina(navController, mealId)
         }
-        composable("modoCocina"){
-            Modo_Cocina(navController)
+        composable("summary_list") {
+            SummaryListScreen(navController = navController)
         }
 
         composable("search") {
             SearchScreen(navController, mealViewModel)
         }
+        composable("category/{category}") { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category") ?: return@composable
+            CategoryScreen(category, navController)
+        }
+
 
     }
 }

@@ -15,23 +15,42 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.data.local.AppDatabase
+import com.example.recipescomp.data.local.FavoriteRecipesEntity
+import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.resourcesApi.Meal
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
+import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
+
 @Composable
-fun OtherRecipeSection(meal: Meal, navController: NavController) {
-    val favorites = remember { mutableStateListOf<String>() }
+fun OtherRecipeSection(
+    meal: Meal,
+    navController: NavController,
+    viewModel: FavoriteRecipeViewModel
+){
+    val context = LocalContext.current
+    val db = AppDatabase.getInstance(context)
+    val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+
+    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val favorites by viewModel.favorites.collectAsState()
+    val isFavorite = favorites.any { it.name == meal.strMeal }
+
     if (meal == null) {
         Box(
             modifier = Modifier
@@ -69,8 +88,9 @@ fun OtherRecipeSection(meal: Meal, navController: NavController) {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(text = meal.strMeal, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Categoría: ${meal.strCategory ?: "Desconocida"}",
+                text = "Categoríes: ${meal.strCategory ?: "Unknown"}",
                 fontSize = 13.sp,
                 color = Color.Gray
             )
@@ -85,27 +105,38 @@ fun OtherRecipeSection(meal: Meal, navController: NavController) {
                 meal.strIngredient7,
                 meal.strIngredient8,
                 meal.strIngredient9,
-                meal.strIngredient10
+                meal.strIngredient10,
+                meal.strIngredient11,
+                meal.strIngredient12,
+                meal.strIngredient13,
+                meal.strIngredient14,
+                meal.strIngredient15
             ).count { !it.isNullOrBlank() }
-
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Ingredientes: $ingredientCount",
+                text = "Ingredients: $ingredientCount",
                 fontSize = 13.sp,
                 color = Color.Gray
             )
         }
 
-        IconButton(
-            onClick = {
-                if (favorites.contains(meal.idMeal)) favorites.remove(meal.idMeal)
-                else favorites.add(meal.idMeal)
-            },
-            modifier = Modifier.align(Alignment.Bottom)
-        ) {
+
+        //Boton de favoritos
+        IconButton(onClick = {
+            if (isFavorite) viewModel.deleteFavorite(meal.strMeal)
+            else viewModel.insertFavorite(
+                FavoriteRecipesEntity(
+                    mealId = meal.idMeal,
+                    name = meal.strMeal,
+                    imageUrl = meal.strMealThumb
+                )
+            )
+
+        }) {
             Icon(
-                imageVector = if (favorites.contains(meal.idMeal)) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = "Favorito",
-                tint = if (favorites.contains(meal.idMeal)) Color.Red else Color.Gray
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorite",
+                tint = if (isFavorite) Color.Red else Color.Gray
             )
         }
     }

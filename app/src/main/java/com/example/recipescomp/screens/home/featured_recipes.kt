@@ -28,7 +28,7 @@ import com.example.recipescomp.ui.theme.BrownDark
 @Composable
 fun FeaturesRecipesSection(navController: NavController, meals: List<Meal>) {
     Text(
-        "Recetas destacadas",
+        "Featured Recipes",
         fontSize = 20.sp,
         modifier = Modifier.padding(16.dp),
         color = BrownDark,

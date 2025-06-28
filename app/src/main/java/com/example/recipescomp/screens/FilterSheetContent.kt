@@ -1,4 +1,4 @@
-package com.example.recipescomp.components
+package com.example.recipescomp.screens
 
 
 import androidx.compose.foundation.background

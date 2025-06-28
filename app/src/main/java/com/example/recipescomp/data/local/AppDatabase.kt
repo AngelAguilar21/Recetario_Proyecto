@@ -7,10 +7,9 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [FavoriteRecipesEntity::class, ShoppingItemEntity::class],
-    version = 2
+    version = 3
 )
 abstract class AppDatabase : RoomDatabase() {
-
     abstract fun FavoriteRecipesDao(): FavoriteRecipesDao
     abstract fun ShoppingListDao(): ShoppingListDao
 
@@ -25,8 +24,9 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "recipe_database"
                 )
-                    .fallbackToDestructiveMigration() // borra la base de datos si hay cambios estructurales (útil en desarrollo)
-                    .build().also { INSTANCE = it }
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
     }
