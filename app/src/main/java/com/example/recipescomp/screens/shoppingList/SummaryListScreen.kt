@@ -45,6 +45,58 @@ fun SummaryListScreen(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var debugInfo by remember { mutableStateOf<String>("")}
+
+    // Función mejorada para parsear ingredientes
+    fun parseIngredient(rawIngredient: String): GroupedIngredient? {
+        val trimmed = rawIngredient.trim()
+        if (trimmed.isEmpty()) return null
+
+        val patterns = listOf(
+            Regex("(.+?)\\((\\d+(?:[.,]\\d+)?)\\s*(\\w+)\\)"),
+            Regex("(\\d+(?:[.,]\\d+)?)\\s*(\\w+)\\s+(.+)"),
+            Regex("(\\d+(?:[.,]\\d+)?)\\s+(.+)"),
+            Regex("(.+?)\\s+(\\d+(?:[.,]\\d+)?)\\s*(\\w+)$")
+        )
+
+        for (pattern in patterns) {
+            val match = pattern.find(trimmed)
+            match?.let {
+                return when (pattern) {
+                    patterns[0] -> {
+                        val name = it.groupValues[1].trim().lowercase()
+                        val quantityStr = it.groupValues[2].replace(",", ".")
+                        val quantity = quantityStr.toDoubleOrNull() ?: 1.0
+                        val unit = it.groupValues[3].trim().lowercase()
+                        GroupedIngredient(name, unit, quantity)
+                    }
+                    patterns[1] -> { // cantidad unidad nombre
+                        val quantityStr = it.groupValues[1].replace(",", ".")
+                        val quantity = quantityStr.toDoubleOrNull() ?: 1.0
+                        val unit = it.groupValues[2].trim().lowercase()
+                        val name = it.groupValues[3].trim().lowercase()
+                        GroupedIngredient(name, unit, quantity)
+                    }
+                    patterns[2] -> { // cantidad nombre
+                        val quantityStr = it.groupValues[1].replace(",", ".")
+                        val quantity = quantityStr.toDoubleOrNull() ?: 1.0
+                        val name = it.groupValues[2].trim().lowercase()
+                        GroupedIngredient(name, "unidad", quantity)
+                    }
+                    patterns[3] -> { // nombre cantidad unidad
+                        val name = it.groupValues[1].trim().lowercase()
+                        val quantityStr = it.groupValues[2].replace(",", ".")
+                        val quantity = quantityStr.toDoubleOrNull() ?: 1.0
+                        val unit = if (it.groupValues[3].isNotEmpty()) it.groupValues[3].trim().lowercase() else "unidad"
+                        GroupedIngredient(name, unit, quantity)
+                    }
+                    else -> null
+                }
+            }
+        }
+
+        return GroupedIngredient(trimmed.lowercase(), "unidad", 1.0)
+    }
 
     LaunchedEffect(true) {
         scope.launch {
@@ -52,32 +104,43 @@ fun SummaryListScreen(navController: NavController) {
                 val db = AppDatabase.getInstance(context)
                 val items = db.ShoppingListDao().getAllItems()
 
+                // Debug: mostrar datos raw
+                val rawIngredients = items.flatMap {
+                    println("Raw ingredients from ${it.name}: ${it.ingredients}")
+                    it.ingredients.split(",", ";", "\n").map { ingredient -> ingredient.trim() }
+                }.filter { it.isNotEmpty() }
+
+                debugInfo = "Total raw ingredients: ${rawIngredients.size}\n" +
+                        "Raw ingredients: ${rawIngredients.joinToString(", ")}"
+
+                println("Raw ingredients list: $rawIngredients")
+
+                // Parsear cada ingrediente
+                val parsedIngredients = rawIngredients.mapNotNull { raw ->
+                    val parsed = parseIngredient(raw)
+                    println("Parsing '$raw' -> $parsed")
+                    parsed
+                }
+
+                println("Parsed ingredients: $parsedIngredients")
+
+                // Agrupar por nombre y unidad
                 val grouped = mutableMapOf<Pair<String, String>, Double>()
-                items.flatMap { it.ingredients.split(",") }
-                    .mapNotNull { raw ->
-                        // Regex mejorado para mejor parsing
-                        val match = Regex("(.+?)\\((\\d+(?:[.,]\\d+)?)\\s*(\\w+)\\)").find(raw.trim())
-                        match?.let {
-                            val name = it.groupValues[1].trim().lowercase()
-                            // Manejo más robusto de números decimales
-                            val quantityStr = it.groupValues[2].replace(",", ".")
-                            val quantity = quantityStr.toDoubleOrNull() ?: 0.0
-                            val unit = it.groupValues[3].trim().lowercase()
-                            Triple(name, unit, quantity)
-                        }
-                    }
-                    .forEach { (name, unit, quantity) ->
-                        val key = name to unit
-                        grouped[key] = grouped.getOrDefault(key, 0.0) + quantity
-                    }
+                parsedIngredients.forEach { ingredient ->
+                    val key = ingredient.name to ingredient.unit
+                    grouped[key] = grouped.getOrDefault(key, 0.0) + ingredient.quantity
+                }
 
                 finalList = grouped.map { (key, quantity) ->
                     GroupedIngredient(name = key.first, unit = key.second, quantity = quantity)
                 }.sortedBy { it.name }
 
+                println("Final grouped list: $finalList")
                 isLoading = false
             } catch (e: Exception) {
                 errorMessage = "Error loading ingredients: ${e.message}"
+                println("Error: ${e.message}")
+                e.printStackTrace()
                 isLoading = false
             }
         }
@@ -274,6 +337,16 @@ fun SummaryListScreen(navController: NavController) {
                                 color = Color.Red,
                                 fontSize = 16.sp
                             )
+
+                            // Mostrar información de debug si está disponible
+                            if (debugInfo.isNotEmpty()) {
+                                Text(
+                                    debugInfo,
+                                    color = Color.Gray,
+                                    fontSize = 12.sp
+                                )
+                            }
+
                             Button(
                                 onClick = {
                                     errorMessage = null
@@ -287,7 +360,6 @@ fun SummaryListScreen(navController: NavController) {
                         }
                     }
                 }
-
                 finalList.isEmpty() -> {
                     // Lista vacía
                     Box(
@@ -311,10 +383,25 @@ fun SummaryListScreen(navController: NavController) {
                                 color = Color.Gray,
                                 fontSize = 14.sp
                             )
+
+                            // Mostrar información de debug
+                            if (debugInfo.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    "Debug Info:",
+                                    color = Color.Gray,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    debugInfo,
+                                    color = Color.Gray,
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
                     }
                 }
-
                 else -> {
                     // Lista de ingredientes
                     Text(
@@ -324,7 +411,6 @@ fun SummaryListScreen(navController: NavController) {
                         modifier = Modifier.padding(bottom = 16.dp),
                         color = BrownDark
                     )
-
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -392,9 +478,7 @@ fun SummaryListScreen(navController: NavController) {
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(16.dp))
-
                     // Botón de compartir
                     Button(
                         onClick = { showDialog = true },
@@ -416,7 +500,6 @@ fun SummaryListScreen(navController: NavController) {
                 }
             }
         }
-
         // Barra de navegación inferior
         BottomNavigationBar(
             navController = navController,
@@ -432,4 +515,3 @@ fun SummaryListScreen(navController: NavController) {
         )
     }
 }
-

@@ -19,6 +19,7 @@ import com.example.recipescomp.auth.Login_Principal
 import com.example.recipescomp.screens.*
 import com.example.recipescomp.screens.home.SearchScreen
 import com.example.recipescomp.resourcesApi.MealViewModel
+import com.example.recipescomp.screens.category.CategoryScreen
 import com.example.recipescomp.screens.shoppingList.Lista_Compras
 import com.example.recipescomp.screens.shoppingList.SummaryListScreen
 
@@ -80,6 +81,11 @@ fun Navigation(){
         composable("search") {
             SearchScreen(navController, mealViewModel)
         }
+        composable("category/{category}") { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category") ?: return@composable
+            CategoryScreen(category, navController)
+        }
+
 
     }
 }
