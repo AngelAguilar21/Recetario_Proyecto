@@ -139,7 +139,7 @@ fun Login_Principal(navController: NavController) {
                     TextButton(onClick = {
                         navController.navigate("Registrarse")
                     }) {
-                        Text("¿No tienes cuenta? Regístrate", color = MaterialTheme.colorScheme.primary)
+                        Text("Don't have an account? Sign up", color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
