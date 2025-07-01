@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -59,6 +60,7 @@ fun Receta(navController: NavController, meal: Meal) {
     val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
+    val scaffoldState = rememberScaffoldState()
 
     val ingredientes = remember(meal) {
         (1..20).mapNotNull { i ->
@@ -334,6 +336,8 @@ fun Receta(navController: NavController, meal: Meal) {
                                 scope.launch {
                                     val db = AppDatabase.getInstance(context)
                                     db.ShoppingListDao().insertItem(item)
+
+                                    scaffoldState.snackbarHostState.showSnackbar("Se añadió a la lista de compras")
                                 }
                             },
                             leadingIcon = {

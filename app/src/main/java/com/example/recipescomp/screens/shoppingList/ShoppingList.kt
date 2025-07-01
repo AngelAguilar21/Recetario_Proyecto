@@ -71,7 +71,7 @@ fun Lista_Compras(navController: NavController) {
                     BackButton(onClick = { navController.popBackStack() })
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Lista de Compras",
+                        text = "Shopping list",
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp
                     )
@@ -89,7 +89,7 @@ fun Lista_Compras(navController: NavController) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Aún no has agregado ninguna receta.",
+                        "You haven't added any recipes yet.",
                         color = Color.Gray,
                         fontSize = 16.sp
                     )
@@ -97,7 +97,7 @@ fun Lista_Compras(navController: NavController) {
             } else {
                 // Título de la sección
                 Text(
-                    text = "Recetas Seleccionadas",
+                    text = "Selected Recipes",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -164,7 +164,7 @@ fun Lista_Compras(navController: NavController) {
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
-                                        contentDescription = "Eliminar",
+                                        contentDescription = "Delete",
                                         tint = Color.Red
                                     )
                                 }
@@ -187,7 +187,7 @@ fun Lista_Compras(navController: NavController) {
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        "Generar Lista",
+                        "Generate List",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White

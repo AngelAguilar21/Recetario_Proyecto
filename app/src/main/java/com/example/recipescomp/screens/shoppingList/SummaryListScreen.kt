@@ -95,7 +95,7 @@ fun SummaryListScreen(navController: NavController) {
             }
         }
 
-        return GroupedIngredient(trimmed.lowercase(), "unidad", 1.0)
+        return GroupedIngredient(trimmed.lowercase(), "unit", 1.0)
     }
 
     LaunchedEffect(true) {

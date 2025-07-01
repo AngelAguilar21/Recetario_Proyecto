@@ -29,8 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -75,7 +77,7 @@ fun ListFavRec(navController: NavController) {
                     BackButton(onClick = { navController.popBackStack() })
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Recetas Favoritas",
+                        text = "Favorite Recipes",
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp
                     )
@@ -84,58 +86,74 @@ fun ListFavRec(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(recipes) { fav ->
-                    val fakeMeal = Meal(
-                        idMeal = fav.mealId,
-                        strMeal = fav.name,
-                        strMealThumb = fav.imageUrl ?: "",
-                        strCategory = fav.category,
-                        strArea = null,
-                        strInstructions = null,
-                        strTags = null,
-                        strYoutube = null,
-                        strDrinkAlternate = null,
-                        strIngredient1 = null, strMeasure1 = null,
-                        strIngredient2 = null, strMeasure2 = null,
-                        strIngredient3 = null, strMeasure3 = null,
-                        strIngredient4 = null, strMeasure4 = null,
-                        strIngredient5 = null, strMeasure5 = null,
-                        strIngredient6 = null, strMeasure6 = null,
-                        strIngredient7 = null, strMeasure7 = null,
-                        strIngredient8 = null, strMeasure8 = null,
-                        strIngredient9 = null, strMeasure9 = null,
-                        strIngredient10 = null, strMeasure10 = null,
-                        strIngredient11 = null, strMeasure11 = null,
-                        strIngredient12 = null, strMeasure12 = null,
-                        strIngredient13 = null, strMeasure13 = null,
-                        strIngredient14 = null, strMeasure14 = null,
-                        strIngredient15 = null, strMeasure15 = null,
-                        strIngredient16 = null, strMeasure16 = null,
-                        strIngredient17 = null, strMeasure17 = null,
-                        strIngredient18 = null, strMeasure18 = null,
-                        strIngredient19 = null, strMeasure19 = null,
-                        strIngredient20 = null, strMeasure20 = null
-                    ).apply {
-                        try {
-                            for (i in 1..fav.ingredientCount.coerceAtMost(20)) {
-                                val field = this::class.java.getDeclaredField("strIngredient$i")
-                                field.isAccessible = true
-                                field.set(this, "Ingrediente $i") // Valor más descriptivo
-                            }
-                        } catch (e: Exception) {
-                            // Manejo de errores en caso de que falle la reflexión
-                        }
-                    }
-
-                    OtherRecipeSection(
-                        meal = fakeMeal,
-                        navController = navController,
-                        viewModel = viewModel
+            if (recipes.isEmpty()) {
+                // Empty state message
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "You haven't added any recipes yet.",
+                        fontSize = 18.sp,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(32.dp)
                     )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(recipes) { fav ->
+                        val fakeMeal = Meal(
+                            idMeal = fav.mealId,
+                            strMeal = fav.name,
+                            strMealThumb = fav.imageUrl ?: "",
+                            strCategory = fav.category,
+                            strArea = null,
+                            strInstructions = null,
+                            strTags = null,
+                            strYoutube = null,
+                            strDrinkAlternate = null,
+                            strIngredient1 = null, strMeasure1 = null,
+                            strIngredient2 = null, strMeasure2 = null,
+                            strIngredient3 = null, strMeasure3 = null,
+                            strIngredient4 = null, strMeasure4 = null,
+                            strIngredient5 = null, strMeasure5 = null,
+                            strIngredient6 = null, strMeasure6 = null,
+                            strIngredient7 = null, strMeasure7 = null,
+                            strIngredient8 = null, strMeasure8 = null,
+                            strIngredient9 = null, strMeasure9 = null,
+                            strIngredient10 = null, strMeasure10 = null,
+                            strIngredient11 = null, strMeasure11 = null,
+                            strIngredient12 = null, strMeasure12 = null,
+                            strIngredient13 = null, strMeasure13 = null,
+                            strIngredient14 = null, strMeasure14 = null,
+                            strIngredient15 = null, strMeasure15 = null,
+                            strIngredient16 = null, strMeasure16 = null,
+                            strIngredient17 = null, strMeasure17 = null,
+                            strIngredient18 = null, strMeasure18 = null,
+                            strIngredient19 = null, strMeasure19 = null,
+                            strIngredient20 = null, strMeasure20 = null
+                        ).apply {
+                            try {
+                                for (i in 1..fav.ingredientCount.coerceAtMost(20)) {
+                                    val field = this::class.java.getDeclaredField("strIngredient$i")
+                                    field.isAccessible = true
+                                    field.set(this, "Ingredients $i") // Valor más descriptivo
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+
+                        OtherRecipeSection(
+                            meal = fakeMeal,
+                            navController = navController,
+                            viewModel = viewModel
+                        )
+                    }
                 }
             }
         }
