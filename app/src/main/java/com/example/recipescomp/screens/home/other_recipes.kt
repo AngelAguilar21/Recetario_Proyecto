@@ -118,6 +118,12 @@ fun OtherRecipeSection(
                 fontSize = 13.sp,
                 color = Color.Gray
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Country: ${meal.strArea ?: "Unknown"}",
+                fontSize = 13.sp,
+                color = Color.Gray
+            )
         }
 
 

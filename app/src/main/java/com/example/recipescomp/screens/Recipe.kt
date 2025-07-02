@@ -140,6 +140,8 @@ fun Receta(navController: NavController, meal: Meal) {
                         Text("Category: $it", style = MaterialTheme.typography.bodySmall)
                     }
 
+                    Spacer(modifier = Modifier.height(6.dp))
+
                     meal.strArea?.let {
                         Text("Country: $it", style = MaterialTheme.typography.bodySmall)
                     }

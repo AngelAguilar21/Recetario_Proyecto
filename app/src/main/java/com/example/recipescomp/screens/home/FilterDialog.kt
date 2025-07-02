@@ -21,11 +21,11 @@ import com.example.recipescomp.ui.theme.BrownDark
 fun FilterDialog(
     viewModel: MealViewModel,
     onDismiss: () -> Unit,
-    onApplyFilters: (String, String, String) -> Unit
+    onApplyFilters: (List<String>, List<String>, List<String>) -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf("") }
-    var selectedArea by remember { mutableStateOf("") }
-    var selectedIngredient by remember { mutableStateOf("") }
+    var selectedCategories by remember { mutableStateOf(listOf<String>()) }
+    var selectedAreas by remember { mutableStateOf(listOf<String>()) }
+    var selectedIngredients by remember { mutableStateOf(listOf<String>()) }
     var selectedFilterType by remember { mutableStateOf("category") }
 
     val categories = viewModel.categories.value
@@ -55,23 +55,63 @@ fun FilterDialog(
                         text = "Category",
                         isSelected = selectedFilterType == "category",
                         onClick = { selectedFilterType = "category" },
-                        brownDark = BrownDark
+                        brownDark = BrownDark,
+                        selectedCount = selectedCategories.size
                     )
                     FilterTab(
                         text = "Country",
                         isSelected = selectedFilterType == "area",
                         onClick = { selectedFilterType = "area" },
-                        brownDark = BrownDark
+                        brownDark = BrownDark,
+                        selectedCount = selectedAreas.size
                     )
                     FilterTab(
                         text = "Ingredients",
                         isSelected = selectedFilterType == "ingredient",
                         onClick = { selectedFilterType = "ingredient" },
-                        brownDark = BrownDark
+                        brownDark = BrownDark,
+                        selectedCount = selectedIngredients.size
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+                // Mostrar contador de seleccionados
+                when (selectedFilterType) {
+                    "category" -> {
+                        if (selectedCategories.isNotEmpty()) {
+                            Text(
+                                "Selected: ${selectedCategories.size} categories",
+                                fontSize = 12.sp,
+                                color = BrownDark,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                    "area" -> {
+                        if (selectedAreas.isNotEmpty()) {
+                            Text(
+                                "Selected: ${selectedAreas.size} countries",
+                                fontSize = 12.sp,
+                                color = BrownDark,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                    "ingredient" -> {
+                        if (selectedIngredients.isNotEmpty()) {
+                            Text(
+                                "Selected: ${selectedIngredients.size} ingredients",
+                                fontSize = 12.sp,
+                                color = BrownDark,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
 
                 LazyColumn(
                     modifier = Modifier.height(300.dp)
@@ -95,11 +135,13 @@ fun FilterDialog(
                                 items(categories) { category ->
                                     FilterItem(
                                         text = category.strCategory,
-                                        isSelected = selectedCategory == category.strCategory,
+                                        isSelected = selectedCategories.contains(category.strCategory),
                                         onClick = {
-                                            selectedCategory = if (selectedCategory == category.strCategory) "" else category.strCategory
-                                            selectedArea = ""
-                                            selectedIngredient = ""
+                                            selectedCategories = if (selectedCategories.contains(category.strCategory)) {
+                                                selectedCategories - category.strCategory
+                                            } else {
+                                                selectedCategories + category.strCategory
+                                            }
                                         },
                                         brownDark = BrownDark
                                     )
@@ -121,11 +163,13 @@ fun FilterDialog(
                                 items(areas) { area ->
                                     FilterItem(
                                         text = area.strArea,
-                                        isSelected = selectedArea == area.strArea,
+                                        isSelected = selectedAreas.contains(area.strArea),
                                         onClick = {
-                                            selectedArea = if (selectedArea == area.strArea) "" else area.strArea
-                                            selectedCategory = ""
-                                            selectedIngredient = ""
+                                            selectedAreas = if (selectedAreas.contains(area.strArea)) {
+                                                selectedAreas - area.strArea
+                                            } else {
+                                                selectedAreas + area.strArea
+                                            }
                                         },
                                         brownDark = BrownDark
                                     )
@@ -147,11 +191,13 @@ fun FilterDialog(
                                 items(ingredients) { ingredient ->
                                     FilterItem(
                                         text = ingredient.strIngredient,
-                                        isSelected = selectedIngredient == ingredient.strIngredient,
+                                        isSelected = selectedIngredients.contains(ingredient.strIngredient),
                                         onClick = {
-                                            selectedIngredient = if (selectedIngredient == ingredient.strIngredient) "" else ingredient.strIngredient
-                                            selectedCategory = ""
-                                            selectedArea = ""
+                                            selectedIngredients = if (selectedIngredients.contains(ingredient.strIngredient)) {
+                                                selectedIngredients - ingredient.strIngredient
+                                            } else {
+                                                selectedIngredients + ingredient.strIngredient
+                                            }
                                         },
                                         brownDark = BrownDark
                                     )
@@ -165,12 +211,12 @@ fun FilterDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onApplyFilters(selectedCategory, selectedArea, selectedIngredient)
+                    onApplyFilters(selectedCategories, selectedAreas, selectedIngredients)
                     onDismiss()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = BrownDark, contentColor = Color.White),
                 shape = RoundedCornerShape(12.dp),
-                enabled = selectedCategory.isNotEmpty() || selectedArea.isNotEmpty() || selectedIngredient.isNotEmpty()
+                enabled = selectedCategories.isNotEmpty() || selectedAreas.isNotEmpty() || selectedIngredients.isNotEmpty()
             ) {
                 Text("Apply Filter")
             }
@@ -179,7 +225,10 @@ fun FilterDialog(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = {
-                        onApplyFilters("", "", "")
+                        selectedCategories = emptyList()
+                        selectedAreas = emptyList()
+                        selectedIngredients = emptyList()
+                        onApplyFilters(emptyList(), emptyList(), emptyList())
                         onDismiss()
                     },
                     border = BorderStroke(1.dp, BrownDark),
@@ -206,7 +255,8 @@ private fun FilterTab(
     text: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    brownDark: Color
+    brownDark: Color,
+    selectedCount: Int = 0
 ) {
     Card(
         modifier = Modifier
@@ -217,13 +267,25 @@ private fun FilterTab(
         ),
         shape = RoundedCornerShape(8.dp)
     ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            color = if (isSelected) Color.White else brownDark,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            fontSize = 12.sp
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = text,
+                color = if (isSelected) Color.White else brownDark,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                fontSize = 12.sp
+            )
+            if (selectedCount > 0) {
+                Text(
+                    text = "($selectedCount)",
+                    color = if (isSelected) Color.White else brownDark,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
     }
 }
 
@@ -241,17 +303,22 @@ private fun FilterItem(
             .padding(vertical = 4.dp, horizontal = 8.dp)
             .clickable { onClick() }
     ) {
-        RadioButton(
-            selected = isSelected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(selectedColor = brownDark)
+        Checkbox(
+            checked = isSelected,
+            onCheckedChange = { onClick() },
+            colors = CheckboxDefaults.colors(
+                checkedColor = brownDark,
+                uncheckedColor = brownDark.copy(alpha = 0.6f),
+                checkmarkColor = Color.White
+            )
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text,
             modifier = Modifier.weight(1f),
             fontSize = 14.sp,
-            color = brownDark
+            color = brownDark,
+            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
         )
     }
 }

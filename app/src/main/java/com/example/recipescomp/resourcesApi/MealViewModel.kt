@@ -184,44 +184,51 @@ class MealViewModel : ViewModel() {
         }
     }
 
-    fun applyFilters(category: String, area: String, ingredient: String) {
+    fun applyFilters(categories: List<String>, areas: List<String>, ingredients: List<String>) {
         _isLoading.value = true
         _meals.value = emptyList()
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = when {
-                    category.isNotEmpty() -> RetrofitClient.api.getMealsByCategory(category).execute()
-                    area.isNotEmpty() -> RetrofitClient.api.getMealsByArea(area).execute()
-                    ingredient.isNotEmpty() -> RetrofitClient.api.getMealsByIngredient(ingredient).execute()
-                    else -> {
-                        withContext(Dispatchers.Main) {
-                            _isLoading.value = false
+                val allFilteredMeals = mutableSetOf<Meal>() // Usamos Set para evitar duplicados
+
+                // Obtener recetas por cada categoría seleccionada
+                categories.forEach { category ->
+                    val response = RetrofitClient.api.getMealsByCategory(category).execute()
+                    if (response.isSuccessful) {
+                        response.body()?.meals?.let { meals ->
+                            allFilteredMeals.addAll(meals)
                         }
-                        return@launch
                     }
                 }
 
-                if (response.isSuccessful) {
-                    response.body()?.meals?.let {
-                        withContext(Dispatchers.Main) {
-                            _meals.value = it
-                            _isLoading.value = false
+                // Obtener recetas por cada área seleccionada
+                areas.forEach { area ->
+                    val response = RetrofitClient.api.getMealsByArea(area).execute()
+                    if (response.isSuccessful) {
+                        response.body()?.meals?.let { meals ->
+                            allFilteredMeals.addAll(meals)
                         }
-                    } ?: run {
-                        withContext(Dispatchers.Main) {
-                            _meals.value = emptyList()
-                            _isLoading.value = false
-                        }
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        _meals.value = emptyList()
-                        _isLoading.value = false
                     }
                 }
+
+                // Obtener recetas por cada ingrediente seleccionado
+                ingredients.forEach { ingredient ->
+                    val response = RetrofitClient.api.getMealsByIngredient(ingredient).execute()
+                    if (response.isSuccessful) {
+                        response.body()?.meals?.let { meals ->
+                            allFilteredMeals.addAll(meals)
+                        }
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    _meals.value = allFilteredMeals.toList().shuffled() // Convertir a lista y mezclar
+                    _isLoading.value = false
+                }
+
             } catch (e: Exception) {
-                println("Error al aplicar filtros: ${e.message}")
+                println("Error al aplicar filtros múltiples: ${e.message}")
                 withContext(Dispatchers.Main) {
                     _isLoading.value = false
                 }
@@ -286,35 +293,6 @@ class MealViewModel : ViewModel() {
         }
     }
 
-    fun getAllMealsSorted() {
-        _isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO) {
-            val allMeals = mutableListOf<Meal>()
-
-            try {
-                for (letter in 'a'..'z') {
-                    val response = RetrofitClient.api.getMealsByLetter(letter.toString()).execute()
-                    if (response.isSuccessful) {
-                        response.body()?.meals?.let {
-                            allMeals.addAll(it)
-                        }
-                    }
-                }
-
-                val sorted = allMeals.sortedBy { it.strMeal }
-
-                withContext(Dispatchers.Main) {
-                    _meals.value = sorted
-                    _isLoading.value = false
-                }
-            } catch (e: Exception) {
-                println("Error al obtener recetas ordenadas: ${e.message}")
-                withContext(Dispatchers.Main) {
-                    _isLoading.value = false
-                }
-            }
-        }
-    }
 
 
 }
