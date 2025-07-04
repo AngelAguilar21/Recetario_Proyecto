@@ -137,12 +137,23 @@ fun Lista_Compras(navController: NavController) {
 
                                 // 📝 Nombre e ingredientes
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = item.name,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = BrownDark
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = item.name,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = BrownDark
+                                        )
+                                        if (item.quantity > 1) {
+                                            Text(
+                                                " x${item.quantity}",
+                                                color = BrownDark,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                modifier = Modifier.padding(start = 6.dp)
+                                            )
+                                        }
+                                    }
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = item.ingredients,
@@ -157,8 +168,13 @@ fun Lista_Compras(navController: NavController) {
                                     onClick = {
                                         scope.launch {
                                             val db = AppDatabase.getInstance(context)
-                                            db.ShoppingListDao().deleteItem(item)
-                                            cargarDesdeRoom()
+                                            val dao = db.ShoppingListDao()
+                                            if (item.quantity > 1) {
+                                                dao.updateItem(item.copy(quantity = item.quantity - 1))
+                                            } else {
+                                                dao.deleteItem(item)
+                                            }
+                                            cargarDesdeRoom() // refresca la lista
                                         }
                                     }
                                 ) {

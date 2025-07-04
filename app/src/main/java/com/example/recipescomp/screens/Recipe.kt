@@ -47,6 +47,9 @@ import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
 import kotlinx.coroutines.launch
+import com.example.recipescomp.data.local.addRecipeToShoppingListUniversal
+
+
 
 @Composable
 fun Receta(navController: NavController, meal: Meal) {
@@ -61,6 +64,7 @@ fun Receta(navController: NavController, meal: Meal) {
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
     val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val ingredientes = remember(meal) {
         (1..20).mapNotNull { i ->
@@ -322,6 +326,7 @@ fun Receta(navController: NavController, meal: Meal) {
                             }
                         )
 
+                        // 📦 En la sección del DropdownMenuItem "Agregar a lista"
                         DropdownMenuItem(
                             text = { Text("Agregar a lista") },
                             onClick = {
@@ -329,17 +334,27 @@ fun Receta(navController: NavController, meal: Meal) {
                                 isInShoppingList.value = true
 
                                 val ingredientesStr = ingredientes.joinToString(", ") { "${it.first} (${it.second})" }
-                                val item = ShoppingItemEntity(
-                                    mealId = meal.idMeal ?: "",
-                                    name = meal.strMeal,
-                                    imageUrl = meal.strMealThumb ?: "",
-                                    ingredients = ingredientesStr
-                                )
                                 scope.launch {
                                     val db = AppDatabase.getInstance(context)
-                                    db.ShoppingListDao().insertItem(item)
+                                    val dao = db.ShoppingListDao()
 
-                                    scaffoldState.snackbarHostState.showSnackbar("Se añadió a la lista de compras")
+                                    // ✅ NORMALIZAR el mealId de forma consistente (solo trim, sin lowercase)
+                                    val mealId = (meal.idMeal ?: "").trim()
+
+                                    if (mealId.isBlank()) {
+                                        snackbarHostState.showSnackbar("Error: ID de receta no válido")
+                                        return@launch
+                                    }
+
+                                    addRecipeToShoppingListUniversal(
+                                        dao = dao,
+                                        mealId = mealId,
+                                        name = meal.strMeal,
+                                        imageUrl = meal.strMealThumb ?: "",
+                                        ingredients = ingredientesStr
+                                    )
+                                    snackbarHostState.showSnackbar("Se añadió a la lista de compras")
+                                    navController.navigate("listaCompras") // Esto refresca la lista al ir a la pantalla de compras
                                 }
                             },
                             leadingIcon = {
@@ -363,6 +378,10 @@ fun Receta(navController: NavController, meal: Meal) {
                 .shadow(10.dp, RoundedCornerShape(50))
                 .fillMaxWidth()
                 .height(64.dp)
+        )
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
