@@ -260,14 +260,43 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                                         Text("${meal.strCategory} • ${meal.strArea}", fontSize = 12.sp, color = Color.Gray)
                                     }
                                     IconButton(onClick = {
-                                        if (isFavorite) favviewModel.deleteFavorite(meal.strMeal)
-                                        else favviewModel.insertFavorite(
-                                            FavoriteRecipesEntity(
-                                                mealId = meal.idMeal,
-                                                name = meal.strMeal,
-                                                imageUrl = meal.strMealThumb
+                                        if (isFavorite) {
+                                            favviewModel.deleteFavorite(meal.strMeal)
+                                        } else {
+                                            val ingredientCount = listOf(
+                                                meal.strIngredient1,
+                                                meal.strIngredient2,
+                                                meal.strIngredient3,
+                                                meal.strIngredient4,
+                                                meal.strIngredient5,
+                                                meal.strIngredient6,
+                                                meal.strIngredient7,
+                                                meal.strIngredient8,
+                                                meal.strIngredient9,
+                                                meal.strIngredient10,
+                                                meal.strIngredient11,
+                                                meal.strIngredient12,
+                                                meal.strIngredient13,
+                                                meal.strIngredient14,
+                                                meal.strIngredient15,
+                                                meal.strIngredient16,
+                                                meal.strIngredient17,
+                                                meal.strIngredient18,
+                                                meal.strIngredient19,
+                                                meal.strIngredient20
+                                            ).count { !it.isNullOrBlank() }
+
+                                            favviewModel.insertFavorite(
+                                                FavoriteRecipesEntity(
+                                                    mealId = meal.idMeal,
+                                                    name = meal.strMeal,
+                                                    imageUrl = meal.strMealThumb,
+                                                    category = meal.strCategory,
+                                                    ingredientCount = ingredientCount
+                                                )
                                             )
-                                        )
+                                        }
+
 
                                     }) {
                                         Icon(

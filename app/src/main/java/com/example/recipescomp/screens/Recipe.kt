@@ -151,14 +151,43 @@ fun Receta(navController: NavController, meal: Meal) {
 
                 // ❤️ BOTÓN DE FAVORITO a la derecha
                 IconButton(onClick = {
-                    if (isFavorite) viewModel.deleteFavorite(meal.strMeal)
-                    else viewModel.insertFavorite(
-                        FavoriteRecipesEntity(
-                            mealId = meal.idMeal,
-                            name = meal.strMeal,
-                            imageUrl = meal.strMealThumb
+                    if (isFavorite) {
+                        viewModel.deleteFavorite(meal.strMeal)
+                    } else {
+                        val ingredientCount = listOf(
+                            meal.strIngredient1,
+                            meal.strIngredient2,
+                            meal.strIngredient3,
+                            meal.strIngredient4,
+                            meal.strIngredient5,
+                            meal.strIngredient6,
+                            meal.strIngredient7,
+                            meal.strIngredient8,
+                            meal.strIngredient9,
+                            meal.strIngredient10,
+                            meal.strIngredient11,
+                            meal.strIngredient12,
+                            meal.strIngredient13,
+                            meal.strIngredient14,
+                            meal.strIngredient15,
+                            meal.strIngredient16,
+                            meal.strIngredient17,
+                            meal.strIngredient18,
+                            meal.strIngredient19,
+                            meal.strIngredient20
+                        ).count { !it.isNullOrBlank() }
+
+                        viewModel.insertFavorite(
+                            FavoriteRecipesEntity(
+                                mealId = meal.idMeal,
+                                name = meal.strMeal,
+                                imageUrl = meal.strMealThumb,
+                                category = meal.strCategory,
+                                ingredientCount = ingredientCount
+                            )
                         )
-                    )
+                    }
+
 
                 }) {
                     Icon(
