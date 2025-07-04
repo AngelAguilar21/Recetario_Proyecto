@@ -103,26 +103,20 @@ fun SummaryListScreen(navController: NavController) {
             try {
                 val db = AppDatabase.getInstance(context)
                 val items = db.ShoppingListDao().getAllItems()
-
-                // Debug: mostrar datos raw
-                val rawIngredients = items.flatMap {
-                    println("Raw ingredients from ${it.name}: ${it.ingredients}")
-                    it.ingredients.split(",", ";", "\n").map { ingredient -> ingredient.trim() }
+                val rawIngredients = items.flatMap { item ->
+                    // Repite los ingredientes según la cantidad
+                    List(item.quantity) {
+                        item.ingredients.split(",", ";", "\n").map { ingredient -> ingredient.trim() }
+                    }.flatten()
                 }.filter { it.isNotEmpty() }
 
                 debugInfo = "Total raw ingredients: ${rawIngredients.size}\n" +
                         "Raw ingredients: ${rawIngredients.joinToString(", ")}"
 
-                println("Raw ingredients list: $rawIngredients")
-
                 // Parsear cada ingrediente
                 val parsedIngredients = rawIngredients.mapNotNull { raw ->
-                    val parsed = parseIngredient(raw)
-                    println("Parsing '$raw' -> $parsed")
-                    parsed
+                    parseIngredient(raw)
                 }
-
-                println("Parsed ingredients: $parsedIngredients")
 
                 // Agrupar por nombre y unidad
                 val grouped = mutableMapOf<Pair<String, String>, Double>()
@@ -135,11 +129,9 @@ fun SummaryListScreen(navController: NavController) {
                     GroupedIngredient(name = key.first, unit = key.second, quantity = quantity)
                 }.sortedBy { it.name }
 
-                println("Final grouped list: $finalList")
                 isLoading = false
             } catch (e: Exception) {
                 errorMessage = "Error loading ingredients: ${e.message}"
-                println("Error: ${e.message}")
                 e.printStackTrace()
                 isLoading = false
             }

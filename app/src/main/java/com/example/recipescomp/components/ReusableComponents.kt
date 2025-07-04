@@ -1,9 +1,4 @@
 package com.example.recipescomp.components
-import androidx.compose.ui.layout.ContentScale
-import android.net.Uri
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,23 +7,21 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.ui.theme.BrownDark
 
 @Composable
@@ -88,7 +81,8 @@ fun ReusableLoginTextField(
         label = { Text(label) },
         modifier = modifier,
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-        singleLine = true
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp)
     )
 }
 
@@ -99,57 +93,17 @@ fun ReusableText(
     fontSize: TextUnit,
     style: TextStyle,
     modifier: Modifier = Modifier,
-    color: Color
+    color: Color,
+    fontWeight: FontWeight = FontWeight.Normal
 ){
     Text(
         text = text,
         fontSize = fontSize,
         style = style,
         modifier = modifier,
-        color = color
+        color = color,
+        fontWeight = fontWeight
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ReusableDropdown(
-    label: String,
-    options: List<String>,
-    selected: String,
-    onSelect: (String) -> Unit,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit
-) {
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { onExpandedChange(!expanded) },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        OutlinedTextField(
-            value = selected,
-            onValueChange = {},
-            label = { Text(label) },
-            readOnly = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor()
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) }
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(text = option) },
-                    onClick = {
-                        onSelect(option)
-                        onExpandedChange(false)
-                    }
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -237,80 +191,5 @@ fun BackButton(
             contentDescription = "Volver atrás",
             tint = tint
         )
-    }
-}
-
-@Composable
-fun RecipeCardFav(
-    title: String,
-    imageUrl: String?,
-    isFavoriteInitial: Boolean,
-    onFavoriteClick: (Boolean) -> Unit = {},
-    navController: NavController,
-    onClick: () -> Unit,
-) {
-    var isFavorite by remember { mutableStateOf(isFavoriteInitial) }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(modifier = Modifier.padding(bottom = 12.dp)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.LightGray)
-                    .clickable {
-                        onClick()
-                    }
-            ) {
-                if (!imageUrl.isNullOrEmpty()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(imageUrl),
-                        contentDescription = title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.LightGray),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Sin Imagen", color = Color.DarkGray)
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = title, style = MaterialTheme.typography.titleMedium)
-
-                IconToggleButton(
-                    checked = isFavorite,
-                    onCheckedChange = {
-                        isFavorite = it
-                        onFavoriteClick(it)
-                    }
-                ) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = if (isFavorite) "Favorito" else "No favorito",
-                        tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
     }
 }

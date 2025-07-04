@@ -111,7 +111,7 @@ fun ListFavRec(navController: NavController) {
                             strMeal = fav.name,
                             strMealThumb = fav.imageUrl ?: "",
                             strCategory = fav.category,
-                            strArea = null,
+                            strArea = fav.area,
                             strInstructions = null,
                             strTags = null,
                             strYoutube = null,
