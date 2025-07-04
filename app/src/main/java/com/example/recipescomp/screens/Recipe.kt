@@ -2,7 +2,6 @@ package com.example.recipescomp.screens
 
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,7 +18,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -41,14 +39,13 @@ import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.components.ReusableButton
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.FavoriteRecipesEntity
-import com.example.recipescomp.data.local.ShoppingItemEntity
 import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
 import kotlinx.coroutines.launch
 import com.example.recipescomp.data.local.addRecipeToShoppingListUniversal
-
+import androidx.core.net.toUri
 
 
 @Composable
@@ -63,7 +60,6 @@ fun Receta(navController: NavController, meal: Meal) {
     val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
-    val scaffoldState = rememberScaffoldState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val ingredientes = remember(meal) {
@@ -102,7 +98,7 @@ fun Receta(navController: NavController, meal: Meal) {
                     .size(40.dp)
                     .background(Color.White.copy(alpha = 0.7f), shape = CircleShape)
                     .clickable { navController.popBackStack() }
-                    .align(Alignment.TopStart), // lo ubica arriba a la izquierda
+                    .align(Alignment.TopStart),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -191,7 +187,8 @@ fun Receta(navController: NavController, meal: Meal) {
                                 name = meal.strMeal,
                                 imageUrl = meal.strMealThumb,
                                 category = meal.strCategory,
-                                ingredientCount = ingredientCount
+                                ingredientCount = ingredientCount,
+                                area = meal.strArea
                             )
                         )
                     }
@@ -290,14 +287,11 @@ fun Receta(navController: NavController, meal: Meal) {
                 }
             }
 
-            // 🔲 Fila con el botón "Modo Cocina" y el FAB de los tres puntos
-            // 📦 Estados necesarios
+            //Fila con el botón "Modo Cocina" y el FAB de los tres puntos
             val expanded = remember { mutableStateOf(false) }
             val isInShoppingList = remember { mutableStateOf(false) }
             val scope = rememberCoroutineScope()
 
-            // 📦 CONTENEDOR para controlar la posición
-            // 🔲 Fila con el botón "Modo Cocina" y el FAB de los tres puntos
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -305,7 +299,7 @@ fun Receta(navController: NavController, meal: Meal) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 🍳 Botón Modo Cocina
+                // Botón Modo Cocina
                 ReusableButton(
                     "Modo Cocina",
                     onClick = {
@@ -316,7 +310,6 @@ fun Receta(navController: NavController, meal: Meal) {
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // Contenedor para el botón flotante + menú
                 Box {
                     // ⋮ Botón flotante
                     FloatingActionButton(
@@ -332,21 +325,20 @@ fun Receta(navController: NavController, meal: Meal) {
                         )
                     }
 
-                    // Menú desplegable hacia ARRIBA y sin borde morado
                     DropdownMenu(
                         expanded = expanded.value,
                         onDismissRequest = { expanded.value = false },
-                        offset = DpOffset(x = 0.dp, y = (-100).dp), // hacia arriba
+                        offset = DpOffset(x = 0.dp, y = (-100).dp),
                         modifier = Modifier
-                            .background(Color(0xFFFFF8DC)) // amarillo claro sin bordes morados
-                            .border(0.dp, Color.Transparent) // sin borde
+                            .background(Color(0xFFFFF8DC))
+                            .border(0.dp, Color.Transparent)
                     ) {
                         DropdownMenuItem(
                             text = { Text("Ver video") },
                             onClick = {
                                 expanded.value = false
                                 meal.strYoutube?.let {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                                    val intent = Intent(Intent.ACTION_VIEW, it.toUri())
                                     context.startActivity(intent)
                                 }
                             },
@@ -355,7 +347,6 @@ fun Receta(navController: NavController, meal: Meal) {
                             }
                         )
 
-                        // 📦 En la sección del DropdownMenuItem "Agregar a lista"
                         DropdownMenuItem(
                             text = { Text("Agregar a lista") },
                             onClick = {
@@ -368,7 +359,7 @@ fun Receta(navController: NavController, meal: Meal) {
                                     val dao = db.ShoppingListDao()
 
                                     // ✅ NORMALIZAR el mealId de forma consistente (solo trim, sin lowercase)
-                                    val mealId = (meal.idMeal ?: "").trim()
+                                    val mealId = meal.idMeal.trim()
 
                                     if (mealId.isBlank()) {
                                         snackbarHostState.showSnackbar("Error: ID de receta no válido")
@@ -379,11 +370,11 @@ fun Receta(navController: NavController, meal: Meal) {
                                         dao = dao,
                                         mealId = mealId,
                                         name = meal.strMeal,
-                                        imageUrl = meal.strMealThumb ?: "",
+                                        imageUrl = meal.strMealThumb,
                                         ingredients = ingredientesStr
                                     )
-                                    snackbarHostState.showSnackbar("Se añadió a la lista de compras")
-                                    navController.navigate("listaCompras") // Esto refresca la lista al ir a la pantalla de compras
+                                    snackbarHostState.showSnackbar("Added to shopping list")
+                                    navController.navigate("listaCompras")
                                 }
                             },
                             leadingIcon = {

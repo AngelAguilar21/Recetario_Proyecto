@@ -103,8 +103,6 @@ fun SummaryListScreen(navController: NavController) {
             try {
                 val db = AppDatabase.getInstance(context)
                 val items = db.ShoppingListDao().getAllItems()
-
-                // Nueva forma: multiplica los ingredientes por la cantidad de cada receta
                 val rawIngredients = items.flatMap { item ->
                     // Repite los ingredientes según la cantidad
                     List(item.quantity) {

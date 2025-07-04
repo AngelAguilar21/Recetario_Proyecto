@@ -309,7 +309,8 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                                                     name = meal.strMeal,
                                                     imageUrl = meal.strMealThumb,
                                                     category = meal.strCategory,
-                                                    ingredientCount = ingredientCount
+                                                    ingredientCount = ingredientCount,
+                                                    area = meal.strArea
                                                 )
                                             )
                                         }

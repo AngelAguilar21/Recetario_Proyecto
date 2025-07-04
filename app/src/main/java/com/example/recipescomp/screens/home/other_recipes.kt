@@ -51,18 +51,6 @@ fun OtherRecipeSection(
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
 
-    if (meal == null) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
-        return
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -161,7 +149,8 @@ fun OtherRecipeSection(
                         name = meal.strMeal,
                         imageUrl = meal.strMealThumb,
                         category = meal.strCategory,
-                        ingredientCount = ingredientCount
+                        ingredientCount = ingredientCount,
+                        area = meal.strArea
                     )
                 )
             }
