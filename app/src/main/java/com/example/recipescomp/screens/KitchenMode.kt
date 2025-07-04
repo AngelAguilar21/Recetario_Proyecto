@@ -51,7 +51,7 @@ fun Modo_Cocina(
 
     if (meal == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Cargando receta...")
+            Text("Loading recipe...")
         }
         return
     }
@@ -59,7 +59,7 @@ fun Modo_Cocina(
     val pasos = meal?.strInstructions
         ?.split("\n")
         ?.filter { it.isNotBlank() }
-        ?: listOf("No hay instrucciones disponibles.")
+        ?: listOf("No instructions available.")
 
     val pagerState = rememberPagerState(initialPage = 0)
     val scope = rememberCoroutineScope()
@@ -118,7 +118,7 @@ fun Modo_Cocina(
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.exit_icon), // Reemplazar con el ícono correcto
-                        contentDescription = "Salir",
+                        contentDescription = "Go out",
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(4.dp)
@@ -153,7 +153,7 @@ fun Modo_Cocina(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = meal!!.strCategory ?: "Sin categoría",
+                        text = meal!!.strCategory ?: "Uncategorized",
                         color = Color.White,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
@@ -163,7 +163,7 @@ fun Modo_Cocina(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = meal!!.strArea ?: "Sin país",
+                        text = meal!!.strArea ?: "Without country",
                         color = Color.White,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
@@ -273,7 +273,7 @@ fun Modo_Cocina(
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
                             ) {
-                                Text("Finalizar", color = Color.White, fontSize = 16.sp)
+                                Text("Finish", color = Color.White, fontSize = 16.sp)
                             }
                         }
                     } else {
@@ -306,7 +306,7 @@ fun Modo_Cocina(
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = BrownDark)
                             ) {
-                                Text("Siguiente", color = Color.White, fontSize = 16.sp)
+                                Text("Next", color = Color.White, fontSize = 16.sp)
                             }
                         }
                     }

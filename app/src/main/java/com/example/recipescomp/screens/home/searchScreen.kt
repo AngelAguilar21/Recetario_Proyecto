@@ -72,7 +72,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                 .background(BrownDark)
                 .padding(
                     top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 25.dp,
-                            start = 12.dp,
+                    start = 12.dp,
                     end = 12.dp,
                     bottom = 20.dp
                 ),
@@ -106,7 +106,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                 shape = RoundedCornerShape(12.dp),
                 textStyle = LocalTextStyle.current.copy(
                     color = BrownDark,
-                    fontSize = 15.sp // Asegúrate de usar un tamaño que no se corte
+                    fontSize = 15.sp
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = BrownDark,
@@ -228,6 +228,18 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                 ) {
                     items(meals) { meal ->
                         val isFavorite = favorites.any { it.name == meal.strMeal }
+
+                        val displayInfo = buildString {
+                            if (!meal.strCategory.isNullOrBlank()) {
+                                append(meal.strCategory)
+                            }
+                            if (!meal.strArea.isNullOrBlank()) {
+                                if (isNotEmpty()) append(" • ")
+                                append(meal.strArea)
+                            }
+                            if (isEmpty()) append("Recipe details")
+                        }
+
                         Card(
                             shape = RoundedCornerShape(16.dp),
                             modifier = Modifier
@@ -257,7 +269,12 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(meal.strMeal, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1)
-                                        Text("${meal.strCategory} • ${meal.strArea}", fontSize = 12.sp, color = Color.Gray)
+                                        // 🔧 LÍNEA MODIFICADA - USA LA NUEVA VARIABLE displayInfo
+                                        Text(
+                                            text = displayInfo,
+                                            fontSize = 12.sp,
+                                            color = Color.Gray
+                                        )
                                     }
                                     IconButton(onClick = {
                                         if (isFavorite) {
@@ -330,8 +347,8 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
             FilterDialog(
                 viewModel = viewModel,
                 onDismiss = { showFilterDialog.value = false },
-                onApplyFilters = { cat, area, ing ->
-                    viewModel.applyFilters(cat, area, ing)
+                onApplyFilters = { categories, areas, ingredients ->
+                    viewModel.applyFilters(categories, areas, ingredients)
                     showFilterDialog.value = false
                 }
             )

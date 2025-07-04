@@ -99,7 +99,7 @@ fun Perfil(navController: NavController) {
                     BackButton(onClick = { navController.popBackStack() })
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Perfil",
+                        text = "Profile",
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp
                     )
@@ -162,7 +162,7 @@ fun Perfil(navController: NavController) {
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Recetas Favoritas",
+                    text = "Favorite recipes",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
