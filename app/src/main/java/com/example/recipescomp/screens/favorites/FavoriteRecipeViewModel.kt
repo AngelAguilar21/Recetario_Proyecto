@@ -9,10 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class FavoriteRecipeViewModel(private val repository: FavoriteRecipeRepository): ViewModel(){
+class FavoriteRecipeViewModel(
+    private val repository: FavoriteRecipeRepository,
+    private val userId: String
+): ViewModel(){
+
     val favorites: StateFlow<List<FavoriteRecipesEntity>> =
         repository
-            .getAll()
+            .getFavoritesByUser(userId)
             .stateIn(viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 emptyList())
@@ -28,13 +32,7 @@ data class FavoriteRecipeViewModel(private val repository: FavoriteRecipeReposit
 
     fun deleteFavorite(name: String) {
         viewModelScope.launch {
-            repository.deleteByName(name)
+            repository.deleteByNameAndUser(name, userId)
         }
     }
-    fun deleteFavorite(recipe: FavoriteRecipesEntity){
-        viewModelScope.launch {
-            repository.delete(recipe)
-        }
-    }
-
 }

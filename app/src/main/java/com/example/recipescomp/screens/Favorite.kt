@@ -43,14 +43,19 @@ import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.screens.home.OtherRecipeSection
 import com.example.recipescomp.ui.theme.BrownDark
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ListFavRec(navController: NavController) {
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
     //Creacion de recetas
-    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val viewModel: FavoriteRecipeViewModel = viewModel(
+        factory = FavoriteRecipeViewModelFactory(repository, currentUserId)
+    )
     val recipes by viewModel.favorites.collectAsState()
 
     Box(

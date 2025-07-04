@@ -5,27 +5,26 @@ suspend fun addRecipeToShoppingListUniversal(
     mealId: String,
     name: String,
     imageUrl: String,
-    ingredients: String
+    ingredients: String,
+    userId: String // ✅ ADDED: userId parameter
 ) {
-    // ✅ NORMALIZAR el mealId de forma consistente
     val safeMealId = mealId.trim()
     if (safeMealId.isBlank()) return
 
-    // 🔍 Buscar si ya existe la receta
-    val existing = dao.getItemByMealId(safeMealId)
+    // ✅ FIXED: Pass userId to check for existing items
+    val existing = dao.getItemByMealId(safeMealId, userId)
 
     if (existing != null) {
-        // ✅ Si existe, incrementar cantidad
         dao.updateItem(existing.copy(quantity = existing.quantity + 1))
     } else {
-        // ✅ Si no existe, crear nueva entrada
         dao.insertItem(
             ShoppingItemEntity(
                 mealId = safeMealId,
                 name = name,
                 imageUrl = imageUrl,
                 ingredients = ingredients,
-                quantity = 1
+                quantity = 1,
+                userId = userId // ✅ FIXED: Set the userId
             )
         )
     }

@@ -11,6 +11,6 @@ data class FavoriteRecipesEntity(
     val imageUrl: String? = null,
     val category: String? = null,
     val ingredientCount: Int = 0,
-    val area: String?
+    val area: String?,
+    val userId: String
 )
-

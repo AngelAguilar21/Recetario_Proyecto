@@ -38,27 +38,27 @@ import com.example.recipescomp.resourcesApi.MealViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
+import com.google.firebase.auth.FirebaseAuth
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
+fun SearchScreen(navController: NavController, mealViewModel: MealViewModel) {
     val searchQuery = remember { mutableStateOf(TextFieldValue("")) }
-    val meals = viewModel.meals.value
-    val isLoading = viewModel.isLoading.value
+    val meals = mealViewModel.meals.value
+    val isLoading = mealViewModel.isLoading.value
     val showFilterDialog = remember { mutableStateOf(false) }
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
 
-    val favviewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
-    val favorites by favviewModel.favorites.collectAsState()
-
-
+    val favoriteViewModel: FavoriteRecipeViewModel = viewModel(
+        factory = FavoriteRecipeViewModelFactory(repository, currentUserId)
+    )
+    val favorites by favoriteViewModel.favorites.collectAsState()
 
     Column(
         modifier = Modifier
@@ -92,7 +92,6 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                 )
             }
 
-
             // 📝 Barra de búsqueda
             OutlinedTextField(
                 value = searchQuery.value,
@@ -125,7 +124,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                     if (searchQuery.value.text.isNotEmpty()) {
                         IconButton(onClick = {
                             searchQuery.value = TextFieldValue("")
-                            viewModel.clearFilters()
+                            mealViewModel.clearFilters()
                         }) {
                             Icon(Icons.Default.Clear, contentDescription = "Limpiar", tint = BrownDark)
                         }
@@ -133,8 +132,6 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                 },
                 singleLine = true
             )
-
-
 
             // 🔍 Botón pequeño para buscar
             Box(
@@ -144,7 +141,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                     .background(Color.White, RoundedCornerShape(12.dp))
                     .clickable {
                         if (searchQuery.value.text.isNotEmpty()) {
-                            viewModel.searchMeals(searchQuery.value.text)
+                            mealViewModel.searchMeals(searchQuery.value.text)
                         }
                     },
                 contentAlignment = Alignment.Center
@@ -171,9 +168,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                     tint = BrownDark
                 )
             }
-
         }
-
 
         // 🌿 Chips de filtros rápidos
         val selectedChip = remember { mutableStateOf("All Recipes") }
@@ -187,8 +182,8 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                     selected = isSelected,
                     onClick = {
                         selectedChip.value = label
-                        if (label == "All Recipes") viewModel.fetchMeals()
-                        if (label == "Random") viewModel.getRandomMeals(3)
+                        if (label == "All Recipes") mealViewModel.fetchMeals()
+                        if (label == "Random") mealViewModel.getRandomMeals(3)
                     },
                     label = {
                         Text(
@@ -205,7 +200,6 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                 )
             }
         }
-
 
         // 📝 Texto de recetas encontradas
         if (!isLoading && meals.isNotEmpty()) {
@@ -269,7 +263,6 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(meal.strMeal, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1)
-                                        // 🔧 LÍNEA MODIFICADA - USA LA NUEVA VARIABLE displayInfo
                                         Text(
                                             text = displayInfo,
                                             fontSize = 12.sp,
@@ -278,7 +271,7 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                                     }
                                     IconButton(onClick = {
                                         if (isFavorite) {
-                                            favviewModel.deleteFavorite(meal.strMeal)
+                                            favoriteViewModel.deleteFavorite(meal.strMeal)
                                         } else {
                                             val ingredientCount = listOf(
                                                 meal.strIngredient1,
@@ -303,19 +296,18 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
                                                 meal.strIngredient20
                                             ).count { !it.isNullOrBlank() }
 
-                                            favviewModel.insertFavorite(
+                                            favoriteViewModel.insertFavorite(
                                                 FavoriteRecipesEntity(
                                                     mealId = meal.idMeal,
                                                     name = meal.strMeal,
                                                     imageUrl = meal.strMealThumb,
                                                     category = meal.strCategory,
                                                     ingredientCount = ingredientCount,
-                                                    area = meal.strArea
+                                                    area = meal.strArea,
+                                                    userId = currentUserId
                                                 )
                                             )
                                         }
-
-
                                     }) {
                                         Icon(
                                             imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -346,10 +338,10 @@ fun SearchScreen(navController: NavController, viewModel: MealViewModel) {
         // 🏰 Filtro lateral como mini ventana (tu mismo FilterDialog modificado)
         if (showFilterDialog.value) {
             FilterDialog(
-                viewModel = viewModel,
+                viewModel = mealViewModel,
                 onDismiss = { showFilterDialog.value = false },
                 onApplyFilters = { categories, areas, ingredients ->
-                    viewModel.applyFilters(categories, areas, ingredients)
+                    mealViewModel.applyFilters(categories, areas, ingredients)
                     showFilterDialog.value = false
                 }
             )

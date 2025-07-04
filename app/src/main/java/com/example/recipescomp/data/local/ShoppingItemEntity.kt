@@ -9,5 +9,6 @@ data class ShoppingItemEntity(
     val name: String,
     val imageUrl: String,
     val ingredients: String,
-    val quantity: Int
+    val quantity: Int,
+    val userId: String
 )

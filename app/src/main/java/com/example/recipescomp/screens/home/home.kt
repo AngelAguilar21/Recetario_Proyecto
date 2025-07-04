@@ -28,6 +28,7 @@ import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,13 +37,15 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
     val shuffledMeals = viewModel.shuffledMeals.value
     val featuredMeals = shuffledMeals.take(10)
     val otherMeals = shuffledMeals.drop(5).take(13)
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
 
-    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
-
+    val viewModel: FavoriteRecipeViewModel = viewModel(
+        factory = FavoriteRecipeViewModelFactory(repository, currentUserId)
+    )
 
     Box(
         modifier = Modifier

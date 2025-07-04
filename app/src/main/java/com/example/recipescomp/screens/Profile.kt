@@ -35,6 +35,7 @@ import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
 import com.example.recipescomp.data.Firebase.FirebaseAuthManager
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -42,9 +43,13 @@ import kotlinx.coroutines.tasks.await
 @Composable
 fun Perfil(navController: NavController) {
     val context = LocalContext.current
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
     val db = AppDatabase.getInstance(context)
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
-    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val viewModel: FavoriteRecipeViewModel = viewModel(
+        factory = FavoriteRecipeViewModelFactory(repository, currentUserId)
+    )
     val favorites by viewModel.favorites.collectAsState()
 
     // Firebase Auth y Firestore

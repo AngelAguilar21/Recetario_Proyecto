@@ -24,6 +24,7 @@ import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.ui.theme.BrownDark
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -46,6 +47,8 @@ fun SummaryListScreen(navController: NavController) {
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var debugInfo by remember { mutableStateOf<String>("")}
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
 
     // Función mejorada para parsear ingredientes
     fun parseIngredient(rawIngredient: String): GroupedIngredient? {
@@ -102,7 +105,7 @@ fun SummaryListScreen(navController: NavController) {
         scope.launch {
             try {
                 val db = AppDatabase.getInstance(context)
-                val items = db.ShoppingListDao().getAllItems()
+                val items = db.ShoppingListDao().getAllItems(currentUserId)
                 val rawIngredients = items.flatMap { item ->
                     // Repite los ingredientes según la cantidad
                     List(item.quantity) {

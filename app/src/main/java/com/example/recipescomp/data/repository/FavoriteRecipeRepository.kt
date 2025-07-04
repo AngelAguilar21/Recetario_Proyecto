@@ -15,5 +15,11 @@ data class FavoriteRecipeRepository(private val dao: FavoriteRecipesDao){
     //Get all
     fun getAll(): Flow<List<FavoriteRecipesEntity>> = dao.getAll()
 
+    fun getFavoritesByUser(userId: String): Flow<List<FavoriteRecipesEntity>> =
+        dao.getFavoritesByUserFlow(userId)
+
+    suspend fun deleteByNameAndUser(name: String, userId: String) =
+        dao.deleteByNameAndUser(name, userId)
+
     suspend fun deleteByName(name: String) = dao.deleteByName(name)
 }

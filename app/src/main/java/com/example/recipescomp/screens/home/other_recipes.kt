@@ -36,6 +36,7 @@ import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.resourcesApi.Meal
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun OtherRecipeSection(
@@ -46,8 +47,11 @@ fun OtherRecipeSection(
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val viewModel: FavoriteRecipeViewModel = viewModel(
+        factory = FavoriteRecipeViewModelFactory(repository, currentUserId)
+    )
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
 
@@ -150,7 +154,8 @@ fun OtherRecipeSection(
                         imageUrl = meal.strMealThumb,
                         category = meal.strCategory,
                         ingredientCount = ingredientCount,
-                        area = meal.strArea
+                        area = meal.strArea,
+                        userId = currentUserId
                     )
                 )
             }

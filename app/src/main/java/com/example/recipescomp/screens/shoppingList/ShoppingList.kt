@@ -26,6 +26,7 @@ import com.example.recipescomp.components.BottomNavigationBar
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.ShoppingItemEntity
 import com.example.recipescomp.ui.theme.BrownDark
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 @Composable
@@ -34,11 +35,13 @@ fun Lista_Compras(navController: NavController) {
     val scope = rememberCoroutineScope()
     var items by remember { mutableStateOf<List<ShoppingItemEntity>>(emptyList()) }
 
-    // 🚀 Cargar recetas guardadas en Room al iniciar la pantalla
     fun cargarDesdeRoom() {
         scope.launch {
             val db = AppDatabase.getInstance(context)
-            items = db.ShoppingListDao().getAllItems()
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+            if (currentUserId != null) {
+                items = db.ShoppingListDao().getAllItems(currentUserId)
+            }
         }
     }
 

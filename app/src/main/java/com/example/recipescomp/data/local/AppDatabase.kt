@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [FavoriteRecipesEntity::class, ShoppingItemEntity::class],
-    version = 6
+    version = 3
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun FavoriteRecipesDao(): FavoriteRecipesDao

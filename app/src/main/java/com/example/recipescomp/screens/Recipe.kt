@@ -46,10 +46,14 @@ import com.example.recipescomp.ui.theme.BrownDark
 import kotlinx.coroutines.launch
 import com.example.recipescomp.data.local.addRecipeToShoppingListUniversal
 import androidx.core.net.toUri
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
 fun Receta(navController: NavController, meal: Meal) {
+
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Ingredients", "Step to Step")
 
@@ -57,7 +61,7 @@ fun Receta(navController: NavController, meal: Meal) {
     val db = AppDatabase.getInstance(context)
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
 
-    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository))
+    val viewModel: FavoriteRecipeViewModel = viewModel(factory = FavoriteRecipeViewModelFactory(repository, currentUserId))
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -188,7 +192,8 @@ fun Receta(navController: NavController, meal: Meal) {
                                 imageUrl = meal.strMealThumb,
                                 category = meal.strCategory,
                                 ingredientCount = ingredientCount,
-                                area = meal.strArea
+                                area = meal.strArea,
+                                userId = currentUserId
                             )
                         )
                     }
@@ -371,7 +376,8 @@ fun Receta(navController: NavController, meal: Meal) {
                                         mealId = mealId,
                                         name = meal.strMeal,
                                         imageUrl = meal.strMealThumb,
-                                        ingredients = ingredientesStr
+                                        ingredients = ingredientesStr,
+                                        userId = currentUserId
                                     )
                                     snackbarHostState.showSnackbar("Added to shopping list")
                                     navController.navigate("listaCompras")
