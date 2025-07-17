@@ -2,6 +2,7 @@ package com.example.recipescomp.screens.shoppingList
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +29,9 @@ import com.example.recipescomp.data.local.ShoppingItemEntity
 import com.example.recipescomp.ui.theme.BrownDark
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+// NUEVOS IMPORTS
+import com.example.recipescomp.screens.home.OtherRecipeSection
+import com.example.recipescomp.resourcesApi.Meal
 
 @Composable
 fun Lista_Compras(navController: NavController) {
@@ -118,7 +122,11 @@ fun Lista_Compras(navController: NavController) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .shadow(4.dp, RoundedCornerShape(16.dp)),
+                                .shadow(4.dp, RoundedCornerShape(16.dp))
+                                .clickable {
+                                    // Navegar a la pantalla de detalles de la receta
+                                    navController.navigate("receta/${item.mealId}")
+                                },
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F2E7))
                         ) {
