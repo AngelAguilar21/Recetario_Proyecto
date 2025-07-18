@@ -69,7 +69,7 @@ fun CategoryScreen(category: String, navController: NavController) {
                         .padding(vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    CircularProgressIndicator(color = BrownDark)
                 }
             } else {
                 // Mostrar las recetas en LazyColumn

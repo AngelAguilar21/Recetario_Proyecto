@@ -33,7 +33,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewModel()) {
+fun HomeScreen(navController: NavController, viewModel: MealViewModel) {
     val shuffledMeals = viewModel.shuffledMeals.value
     val featuredMeals = shuffledMeals.take(10)
     val otherMeals = shuffledMeals.drop(5).take(13)
@@ -51,7 +51,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
-            .padding(top = 40.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
 
     ) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -85,7 +85,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel = viewMode
                             .padding(vertical = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        CircularProgressIndicator(color = BrownDark)
                     }
                 }
             } else {
