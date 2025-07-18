@@ -1,4 +1,9 @@
 package com.example.recipescomp.components
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -11,9 +16,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -22,7 +31,14 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.recipescomp.data.local.FavoriteRecipesEntity
 import com.example.recipescomp.ui.theme.BrownDark
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun ReusableButton(
@@ -192,4 +208,123 @@ fun BackButton(
             tint = tint
         )
     }
+}
+
+@Composable
+fun FavoriteRecipeCard(
+    recipe: FavoriteRecipesEntity,
+    onClick: () -> Unit = {},
+    onDelete: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .shadow(4.dp, shape = RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.White)
+            .clickable { onClick() }
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(recipe.imageUrl),
+            contentDescription = recipe.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(90.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = recipe.name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Categoría: ${recipe.category ?: "Unknown"}",
+                fontSize = 13.sp,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Ingredientes: ${recipe.ingredientCount}",
+                fontSize = 13.sp,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Origen: ${recipe.area ?: "Unknown"}",
+                fontSize = 13.sp,
+                color = Color.Gray
+            )
+        }
+
+        // Botón para eliminar de favoritos
+        IconButton(onClick = {
+            onDelete(recipe.name)
+        }) {
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = "Eliminar de favoritos",
+                tint = Color.Red
+            )
+        }
+    }
+}
+
+@Composable
+fun EditNameDialog(
+    initialName: String,
+    onDismiss: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    var name by remember { mutableStateOf(initialName) }
+    var loading by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                scope.launch {
+                    try {
+                        loading = true
+                        val user = FirebaseAuth.getInstance().currentUser ?: return@launch
+                        val userId = user.uid
+
+                        FirebaseFirestore.getInstance()
+                            .collection("users")
+                            .document(userId)
+                            .update("name", name)
+                            .await()
+
+                        loading = false
+                        onDismiss()
+                    } catch (e: Exception) {
+                        loading = false
+                        Log.e("EditarNombre", "Error: ${e.message}")
+                    }
+                }
+            }) {
+                Text(if (loading) "Guardando..." else "Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        },
+        title = { Text("Editar nombre") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nuevo nombre") },
+                    singleLine = true
+                )
+            }
+        },
+        shape = RoundedCornerShape(16.dp)
+    )
 }

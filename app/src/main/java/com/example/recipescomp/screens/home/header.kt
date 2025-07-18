@@ -1,6 +1,7 @@
 package com.example.recipescomp.screens.home
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,9 +22,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.recipescomp.ui.theme.BrownDark
+import androidx.compose.runtime.*
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
+import com.example.recipescomp.data.Firebase.FirebaseAuthManager
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun HeaderSection(navController: NavController) {
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(currentUserId) {
+        currentUserId?.let {
+            val url = FirebaseAuthManager.getProfileImageUrl(it)
+            profileImageUrl = url
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,20 +81,29 @@ fun HeaderSection(navController: NavController) {
                     modifier = Modifier
                         .size(60.dp)
                         .clip(CircleShape)
-                        .background(Color.White),
+                        .background(Color.White)
+                        .clickable {
+                            navController.navigate("perfil")
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "User",
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clickable {
-                                navController.navigate("perfil")
-                            }
-                    )
+                    if (profileImageUrl != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(profileImageUrl),
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "User",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(50.dp)
+                        )
+                    }
                 }
+
             }
 
             // 🔍 Barra de búsqueda

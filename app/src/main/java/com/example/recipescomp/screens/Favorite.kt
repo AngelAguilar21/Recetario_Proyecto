@@ -1,7 +1,7 @@
 package com.example.recipescomp.screens
 
+import android.net.Uri
 import androidx.compose.foundation.lazy.items
-import com.example.recipescomp.resourcesApi.Meal
 import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.components.BottomNavigationBar
 import androidx.compose.foundation.background
@@ -37,11 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.recipescomp.components.FavoriteRecipeCard
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
-import com.example.recipescomp.screens.home.OtherRecipeSection
 import com.example.recipescomp.ui.theme.BrownDark
 import com.google.firebase.auth.FirebaseAuth
 
@@ -56,8 +56,7 @@ fun ListFavRec(navController: NavController) {
     val viewModel: FavoriteRecipeViewModel = viewModel(
         factory = FavoriteRecipeViewModelFactory(repository, currentUserId)
     )
-    val recipes by viewModel.favorites.collectAsState()
-
+    val favorites by viewModel.favorites.collectAsState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -91,7 +90,7 @@ fun ListFavRec(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (recipes.isEmpty()) {
+            if (favorites.isEmpty()) {
                 // Empty state message
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -110,53 +109,15 @@ fun ListFavRec(navController: NavController) {
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(recipes) { fav ->
-                        val fakeMeal = Meal(
-                            idMeal = fav.mealId,
-                            strMeal = fav.name,
-                            strMealThumb = fav.imageUrl ?: "",
-                            strCategory = fav.category,
-                            strArea = fav.area,
-                            strInstructions = null,
-                            strTags = null,
-                            strYoutube = null,
-                            strDrinkAlternate = null,
-                            strIngredient1 = null, strMeasure1 = null,
-                            strIngredient2 = null, strMeasure2 = null,
-                            strIngredient3 = null, strMeasure3 = null,
-                            strIngredient4 = null, strMeasure4 = null,
-                            strIngredient5 = null, strMeasure5 = null,
-                            strIngredient6 = null, strMeasure6 = null,
-                            strIngredient7 = null, strMeasure7 = null,
-                            strIngredient8 = null, strMeasure8 = null,
-                            strIngredient9 = null, strMeasure9 = null,
-                            strIngredient10 = null, strMeasure10 = null,
-                            strIngredient11 = null, strMeasure11 = null,
-                            strIngredient12 = null, strMeasure12 = null,
-                            strIngredient13 = null, strMeasure13 = null,
-                            strIngredient14 = null, strMeasure14 = null,
-                            strIngredient15 = null, strMeasure15 = null,
-                            strIngredient16 = null, strMeasure16 = null,
-                            strIngredient17 = null, strMeasure17 = null,
-                            strIngredient18 = null, strMeasure18 = null,
-                            strIngredient19 = null, strMeasure19 = null,
-                            strIngredient20 = null, strMeasure20 = null
-                        ).apply {
-                            try {
-                                for (i in 1..fav.ingredientCount.coerceAtMost(20)) {
-                                    val field = this::class.java.getDeclaredField("strIngredient$i")
-                                    field.isAccessible = true
-                                    field.set(this, "Ingredients $i") // Valor más descriptivo
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
+                    items(favorites) { fav ->
+                        FavoriteRecipeCard(
+                            recipe = fav,
+                            onClick = {
+                                navController.navigate("receta/${Uri.encode(fav.mealId)}")
+                            },
+                            onDelete = { name ->
+                                viewModel.deleteFavorite(name)
                             }
-                        }
-
-                        OtherRecipeSection(
-                            meal = fakeMeal,
-                            navController = navController,
-                            viewModel = viewModel
                         )
                     }
                 }

@@ -1,5 +1,9 @@
 package com.example.recipescomp.screens
 
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,21 +24,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.recipescomp.components.BackButton
 import com.example.recipescomp.components.BottomNavigationBar
+import com.example.recipescomp.components.EditNameDialog
+import com.example.recipescomp.data.Firebase.FirebaseAuthManager
 import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.repository.FavoriteRecipeRepository
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModel
 import com.example.recipescomp.screens.favorites.FavoriteRecipeViewModelFactory
 import com.example.recipescomp.ui.theme.BrownDark
-import com.example.recipescomp.data.Firebase.FirebaseAuthManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -52,17 +57,34 @@ fun Perfil(navController: NavController) {
     )
     val favorites by viewModel.favorites.collectAsState()
 
-    // Firebase Auth y Firestore
     val currentUser = FirebaseAuthManager.getCurrentUser()
     val firestore = FirebaseFirestore.getInstance()
 
-    // Estados para el usuario
     var userName by remember { mutableStateOf("Usuario") }
     var userEmail by remember { mutableStateOf("") }
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showEditNameDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    // Obtener datos del usuario desde Firestore
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            scope.launch {
+                val result = FirebaseAuthManager.uploadProfileImage(currentUserId, it)
+                result.onSuccess { url ->
+                    profileImageUrl = url
+
+                    // 🔁 Recargar desde Firestore para asegurarte
+                    val refreshedUrl = FirebaseAuthManager.getProfileImageUrl(currentUserId)
+                    profileImageUrl = refreshedUrl
+                }
+            }
+        }
+    }
+
+
     LaunchedEffect(currentUser) {
         currentUser?.let { user ->
             userEmail = user.email ?: ""
@@ -76,54 +98,36 @@ fun Perfil(navController: NavController) {
             } catch (e: Exception) {
                 userName = user.email?.substringBefore("@") ?: "Usuario"
             }
+            profileImageUrl = FirebaseAuthManager.getProfileImageUrl(user.uid)
         }
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                top = 40.dp,
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            )
+            .padding(top = 40.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(PaddingValues(start = 16.dp, end = 16.dp, bottom = 70.dp))
-        )
-        {
+                .padding(start = 16.dp, end = 16.dp, bottom = 70.dp)
+        ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     BackButton(onClick = { navController.popBackStack() })
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "Profile",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    )
+                    Text("Profile", fontWeight = FontWeight.Bold, fontSize = 24.sp)
                 }
 
-                // Botón de cerrar sesión
                 IconButton(
                     onClick = { showLogoutDialog = true },
-                    modifier = Modifier
-                        .background(
-                            Color.Red.copy(alpha = 0.1f),
-                            CircleShape
-                        )
+                    modifier = Modifier.background(Color.Red.copy(alpha = 0.1f), CircleShape)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ExitToApp,
-                        contentDescription = "Cerrar sesión",
-                        tint = Color.Red
-                    )
+                    Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión", tint = Color.Red)
                 }
             }
 
@@ -134,63 +138,78 @@ fun Perfil(navController: NavController) {
                     modifier = Modifier
                         .size(80.dp)
                         .clip(CircleShape)
-                        .background(Color.LightGray),
+                        .background(Color.LightGray)
+                        .clickable { launcher.launch("image/*") },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Avatar",
-                        modifier = Modifier.size(72.dp),
-                        tint = Color.DarkGray
-                    )
+                    if (profileImageUrl != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(profileImageUrl),
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(Icons.Default.AccountCircle, contentDescription = "Avatar", modifier = Modifier.size(72.dp), tint = Color.DarkGray)
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Column {
-                    Text(
-                        text = userName,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(userName, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     if (userEmail.isNotEmpty()) {
-                        Text(
-                            text = userEmail,
-                            fontSize = 14.sp,
-                            color = Color.Gray
+                        Text(userEmail, fontSize = 14.sp, color = Color.Gray)
+                    }
+
+                    Button(
+                        onClick = { showEditNameDialog = true },
+                        modifier = Modifier.padding(top = 8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = BrownDark, contentColor = Color.White)
+                    ) {
+                        Text("Edit Name")
+                    }
+                    if (showEditNameDialog) {
+                        EditNameDialog(
+                            initialName = userName,
+                            onDismiss = {
+                                showEditNameDialog = false
+
+                                // Recarga el nombre desde Firestore
+                                scope.launch {
+                                    val userId = FirebaseAuth.getInstance().currentUser?.uid
+                                    userId?.let {
+                                        val doc = FirebaseFirestore.getInstance()
+                                            .collection("users")
+                                            .document(it)
+                                            .get()
+                                            .await()
+                                        userName = doc.getString("name") ?: userName
+                                    }
+                                }
+                            }
                         )
                     }
+
+
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Favorite recipes",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+                Text("Favorite recipes", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = "Favoritas",
-                    tint = Color.Yellow
-                )
+                Icon(Icons.Default.Star, contentDescription = "Favoritas", tint = Color.Yellow)
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp)
-            ) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(horizontal = 4.dp)) {
                 items(favorites) { fav ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .width(100.dp)
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.width(100.dp).padding(vertical = 8.dp)
                     ) {
                         Box(
                             modifier = Modifier
@@ -198,10 +217,7 @@ fun Perfil(navController: NavController) {
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(Color.LightGray)
-                                .clickable {
-                                    navController.navigate("receta/${fav.mealId}")
-                                }
-
+                                .clickable { navController.navigate("receta/${fav.mealId}") }
                         ) {
                             Image(
                                 painter = rememberAsyncImagePainter(fav.imageUrl),
@@ -211,18 +227,12 @@ fun Perfil(navController: NavController) {
                             )
                         }
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = fav.name,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.DarkGray
-                        )
+                        Text(fav.name, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.DarkGray)
                     }
                 }
             }
         }
-
-        // 🔽 BARRA DE NAVEGACIÓN INFERIOR
+// 🔽 BARRA DE NAVEGACIÓN INFERIOR
         BottomNavigationBar(
             navController = navController,
             modifier = Modifier
@@ -237,16 +247,11 @@ fun Perfil(navController: NavController) {
         )
     }
 
-    // Diálogo de confirmación para cerrar sesión
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = {
-                Text("Cerrar sesión")
-            },
-            text = {
-                Text("¿Estás seguro de que quieres cerrar sesión?")
-            },
+            title = { Text("Cerrar sesión") },
+            text = { Text("¿Estás seguro de que quieres cerrar sesión?") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -254,7 +259,6 @@ fun Perfil(navController: NavController) {
                             try {
                                 FirebaseAuthManager.signOut()
                                 showLogoutDialog = false
-                                // Navegar a la pantalla de login y limpiar el back stack
                                 navController.navigate("Login_Principal") {
                                     popUpTo(0) { inclusive = true }
                                 }
@@ -263,17 +267,13 @@ fun Perfil(navController: NavController) {
                             }
                         }
                     },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color.Red
-                    )
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
                 ) {
                     Text("Cerrar sesión")
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = { showLogoutDialog = false }
-                ) {
+                TextButton(onClick = { showLogoutDialog = false }) {
                     Text("Cancelar")
                 }
             }
