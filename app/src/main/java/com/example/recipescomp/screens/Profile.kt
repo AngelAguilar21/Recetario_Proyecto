@@ -67,22 +67,6 @@ fun Perfil(navController: NavController) {
     var showEditNameDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            scope.launch {
-                val result = FirebaseAuthManager.uploadProfileImage(currentUserId, it)
-                result.onSuccess { url ->
-                    profileImageUrl = url
-
-                    // 🔁 Recargar desde Firestore para asegurarte
-                    val refreshedUrl = FirebaseAuthManager.getProfileImageUrl(currentUserId)
-                    profileImageUrl = refreshedUrl
-                }
-            }
-        }
-    }
 
 
     LaunchedEffect(currentUser) {
@@ -98,7 +82,7 @@ fun Perfil(navController: NavController) {
             } catch (e: Exception) {
                 userName = user.email?.substringBefore("@") ?: "Usuario"
             }
-            profileImageUrl = FirebaseAuthManager.getProfileImageUrl(user.uid)
+
         }
     }
 
@@ -138,20 +122,10 @@ fun Perfil(navController: NavController) {
                     modifier = Modifier
                         .size(80.dp)
                         .clip(CircleShape)
-                        .background(Color.LightGray)
-                        .clickable { launcher.launch("image/*") },
+                        .background(Color.LightGray),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (profileImageUrl != null) {
-                        Image(
-                            painter = rememberAsyncImagePainter(profileImageUrl),
-                            contentDescription = "Foto de perfil",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
                         Icon(Icons.Default.AccountCircle, contentDescription = "Avatar", modifier = Modifier.size(72.dp), tint = Color.DarkGray)
-                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))

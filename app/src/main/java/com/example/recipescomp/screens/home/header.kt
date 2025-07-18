@@ -36,12 +36,6 @@ fun HeaderSection(navController: NavController) {
     var profileImageUrl by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(currentUserId) {
-        currentUserId?.let {
-            val url = FirebaseAuthManager.getProfileImageUrl(it)
-            profileImageUrl = url
-        }
-    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
