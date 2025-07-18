@@ -42,7 +42,7 @@ fun FeaturesRecipesSection(navController: NavController, meals: List<Meal>) {
                 .padding(vertical = 16.dp),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            CircularProgressIndicator(color = BrownDark)
         }
         return
     }

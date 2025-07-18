@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import com.example.recipescomp.R
 import com.example.recipescomp.components.*
 import com.example.recipescomp.data.Firebase.FirebaseAuthManager
+import com.example.recipescomp.ui.theme.BrownDark
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -121,7 +122,7 @@ fun Login_Principal(navController: NavController) {
 
                     if (isLoading) {
                         CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = BrownDark,
                             modifier = Modifier.padding(16.dp)
                         )
                     } else {
@@ -140,7 +141,7 @@ fun Login_Principal(navController: NavController) {
                     TextButton(onClick = {
                         navController.navigate("Registrarse")
                     }) {
-                        Text("Don't have an account? Sign up", color = MaterialTheme.colorScheme.primary)
+                        Text("Don't have an account? Sign up", color = BrownDark)
                     }
                 }
             }

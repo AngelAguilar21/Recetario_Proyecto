@@ -85,7 +85,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel) {
                             .padding(vertical = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        CircularProgressIndicator(color = BrownDark)
                     }
                 }
             } else {
