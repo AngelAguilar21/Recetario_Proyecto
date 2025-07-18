@@ -28,8 +28,14 @@ import com.example.recipescomp.screens.shoppingList.SummaryListScreen
 fun Navigation(){
     val navController = rememberNavController()
     val mealViewModel: MealViewModel = viewModel()
+    // Validar si el usuario está logueado
+    val startDestination = if (com.example.recipescomp.data.Firebase.FirebaseAuthManager.isUserLoggedIn()) {
+        "Principal"
+    } else {
+        "Inicio_Login"
+    }
 
-    NavHost(navController = navController, startDestination = "Inicio_Login"){
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("Inicio_Login"){
             Inicio_Login(navController)
         }
