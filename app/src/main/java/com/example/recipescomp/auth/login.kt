@@ -59,13 +59,12 @@ fun Login_Principal(navController: NavController) {
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    ) { _->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
-                    top = paddingValues.calculateTopPadding()
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 )
         ) {
             Image(
