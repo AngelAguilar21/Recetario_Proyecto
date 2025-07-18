@@ -49,7 +49,7 @@ fun Navigation(){
             ListFavRec(navController)
         }
         composable("Principal"){
-            HomeScreen(navController)
+            HomeScreen(navController, mealViewModel)
         }
         composable("listaCompras"){
             Lista_Compras(navController)
