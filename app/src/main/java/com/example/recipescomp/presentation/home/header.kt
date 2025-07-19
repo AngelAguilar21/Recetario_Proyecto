@@ -1,0 +1,127 @@
+package com.example.recipescomp.presentation.home
+
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.recipescomp.core.theme.BrownDark
+import androidx.compose.runtime.*
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
+
+@Composable
+fun HeaderSection(navController: NavController) {
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .background(
+                BrownDark,
+                shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+            )
+    )
+    {
+        Column(
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Column {
+                    Text(
+                        text = "Welcome Chef!",
+                        color = Color.White,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        text = "The ingredients await you...",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .clickable {
+                            navController.navigate("perfil")
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (profileImageUrl != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(profileImageUrl),
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "User",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(50.dp)
+                        )
+                    }
+                }
+
+            }
+
+            // 🔍 Barra de búsqueda
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                    // Al hacer clic, navegamos a la pantalla de búsqueda
+                    navController.navigate("search")
+                    }
+                    .padding(10.dp)
+                    .background(Color.White, shape = RoundedCornerShape(16.dp))
+                    .height(50.dp)
+                    .border(2.dp, Color.Gray, RoundedCornerShape(16.dp)),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Ícono de búsqueda",
+                    tint = Color.Gray,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Search recipes...",
+                    color = Color.Gray,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+        }
+    }
+
+}

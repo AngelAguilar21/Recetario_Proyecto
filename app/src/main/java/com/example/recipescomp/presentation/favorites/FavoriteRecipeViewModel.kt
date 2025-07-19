@@ -1,0 +1,38 @@
+package com.example.recipescomp.presentation.favorites
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.recipescomp.data.local.entities.FavoriteRecipesEntity
+import com.example.recipescomp.domain.repository.FavoriteRecipeRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+class FavoriteRecipeViewModel(
+    private val repository: FavoriteRecipeRepository,
+    private val userId: String
+): ViewModel(){
+
+    val favorites: StateFlow<List<FavoriteRecipesEntity>> =
+        repository
+            .getFavoritesByUser(userId)
+            .stateIn(viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                emptyList())
+
+    fun insertFavorite(recipe: FavoriteRecipesEntity){
+        viewModelScope.launch {
+            val current = favorites.value
+            if (current.none { it.name == recipe.name }) {
+                repository.insert(recipe)
+            }
+        }
+    }
+
+    fun deleteFavorite(name: String) {
+        viewModelScope.launch {
+            repository.deleteByNameAndUser(name, userId)
+        }
+    }
+}

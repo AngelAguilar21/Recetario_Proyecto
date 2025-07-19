@@ -1,0 +1,16 @@
+package com.example.recipescomp.data.local.entities
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "favorite_recipes")
+data class FavoriteRecipesEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val mealId: String,
+    val name: String,
+    val imageUrl: String? = null,
+    val category: String? = null,
+    val ingredientCount: Int = 0,
+    val area: String?,
+    val userId: String
+)
