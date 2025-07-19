@@ -20,34 +20,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.recipescomp.data.local.AppDatabase
 import com.example.recipescomp.data.local.entities.FavoriteRecipesEntity
-import com.example.recipescomp.domain.repository.FavoriteRecipeRepository
 import com.example.recipescomp.data.remote.Meal
 import com.example.recipescomp.presentation.favorites.FavoriteRecipeViewModel
-import com.example.recipescomp.presentation.favorites.FavoriteRecipeViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun OtherRecipeSection(
     meal: Meal,
     navController: NavController,
+    viewModel: FavoriteRecipeViewModel
 ){
-    val context = LocalContext.current
-    val db = AppDatabase.getInstance(context)
-    val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-    val viewModel: FavoriteRecipeViewModel = viewModel(
-        factory = FavoriteRecipeViewModelFactory(repository, currentUserId)
-    )
     val favorites by viewModel.favorites.collectAsState()
     val isFavorite = favorites.any { it.name == meal.strMeal }
 
@@ -114,7 +103,6 @@ fun OtherRecipeSection(
             )
         }
 
-
         //Boton de favoritos
         IconButton(onClick = {
             if (isFavorite) {
@@ -155,8 +143,6 @@ fun OtherRecipeSection(
                     )
                 )
             }
-
-
         }) {
             Icon(
                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -165,9 +151,4 @@ fun OtherRecipeSection(
             )
         }
     }
-
-
 }
-
-
-

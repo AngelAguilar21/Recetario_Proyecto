@@ -32,8 +32,8 @@ import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, viewModel: MealViewModel) {
-    val shuffledMeals = viewModel.shuffledMeals.value
+fun HomeScreen(navController: NavController, mealViewModel: MealViewModel) {
+    val shuffledMeals = mealViewModel.shuffledMeals.value
     val featuredMeals = shuffledMeals.take(10)
     val otherMeals = shuffledMeals.drop(5).take(13)
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -42,7 +42,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel) {
     val db = AppDatabase.getInstance(context)
     val repository = FavoriteRecipeRepository(db.FavoriteRecipesDao())
 
-    val viewModel: FavoriteRecipeViewModel = viewModel(
+    val favoriteViewModel: FavoriteRecipeViewModel = viewModel(
         factory = FavoriteRecipeViewModelFactory(repository, currentUserId)
     )
 
@@ -92,7 +92,7 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel) {
                     OtherRecipeSection(
                         meal = meal,
                         navController = navController,
-                        viewModel = viewModel
+                        viewModel = favoriteViewModel
                     )
                 }
 
@@ -113,4 +113,3 @@ fun HomeScreen(navController: NavController, viewModel: MealViewModel) {
         )
     }
 }
-
